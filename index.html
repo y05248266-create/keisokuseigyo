@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>計測制御の技術 - 技術科Web教材</title>
-    <!-- Tailwind CSS (スタイリング用) -->
+    <title>計測制御の技術 - 中学校 技術科Web教材</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome アイコン (視覚的アイコン用) -->
+    <!-- Font Awesome アイコン -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js (クイズ結果の円グラフ可視化用) -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Canvas Confetti (成功時・クイズ高得点時の紙吹雪演出用) -->
+    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
@@ -18,196 +18,259 @@
         
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f8fafc; /* 明るいスレートホワイト背景 */
-            color: #0f172a; /* 高コントラストなダークネイビー文字 */
+            background-color: #f8fafc;
+            color: #0f172a;
             user-select: none;
             overflow-x: hidden;
+            line-height: 1.7;
+        }
+
+        /* ふりがな（ルビ） */
+        ruby rt {
+            font-size: 0.65em;
+            color: #2563eb;
+            font-weight: 700;
         }
 
         /* カスタムスクロールバー */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #2563eb;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
 
-        /* スライドアニメーション効果 */
-        .slide-container {
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        }
-        .slide-enter {
-            opacity: 0;
-            transform: translateY(8px);
-        }
-        .slide-active {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        /* スライド遷移 */
+        .slide-container { transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out; }
+        .slide-enter { opacity: 0; transform: translateY(10px); }
+        .slide-active { opacity: 1; transform: translateY(0); }
 
         /* インタラクティブカード */
-        .card-interactive {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        .card-interactive { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-interactive:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -4px rgba(37, 99, 235, 0.16); }
+
+        /* 動く絵・SVGアニメーション */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.85); opacity: 0.8; }
+            100% { transform: scale(1.8); opacity: 0; }
         }
-        .card-interactive:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 18px -4px rgba(37, 99, 235, 0.12);
+        .animate-radar {
+            transform-origin: center;
+            animation: pulse-ring 1.8s infinite ease-out;
         }
 
-        /* アピールパルスアニメーション */
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float { animation: float-slow 3s infinite ease-in-out; }
+
+        @keyframes spin-fan {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fan-slow { transform-origin: center; animation: spin-fan 3s linear infinite; }
+        .fan-fast { transform-origin: center; animation: spin-fan 0.6s linear infinite; }
+
+        @keyframes flow-dash {
+            to { stroke-dashoffset: -24; }
+        }
+        .animate-flow {
+            stroke-dasharray: 8 4;
+            animation: flow-dash 0.8s linear infinite;
+        }
+
         @keyframes pulse-border {
             0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); }
             50% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
         }
-        .pulse-highlight {
-            animation: pulse-border 2s infinite;
+        .pulse-highlight { animation: pulse-border 2s infinite; }
+
+        /* Chromebook向けスライダー */
+        input[type="range"] { height: 12px; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative bg-slate-50 text-slate-900">
 
-    <!-- ==================== 固定ヘッダー (ナビゲーション・タイトル) ==================== -->
+    <!-- ==================== 固定ヘッダー ==================== -->
     <header class="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-40 px-4 py-3 shadow-sm">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-            <!-- タイトルとアイコン -->
             <div class="flex items-center space-x-3">
                 <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-sm flex items-center justify-center">
                     <i class="fa-solid fa-microchip text-xl"></i>
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2">
-                        計測制御の技術
-                        <span class="text-xs bg-blue-100 text-blue-800 border border-blue-200 px-2.5 py-0.5 rounded-full font-bold hidden sm:inline-block">中学校・高校 技術科Web教材</span>
+                        <span><ruby>計測<rt>けいそく</rt></ruby><ruby>制御<rt>せいぎょ</rt></ruby>の<ruby>技術<rt>ぎじゅつ</rt></ruby></span>
+                        <span class="text-xs bg-blue-100 text-blue-800 border border-blue-200 px-2.5 py-0.5 rounded-full font-bold hidden sm:inline-block">中学校 技術科Web教材</span>
                     </h1>
                 </div>
             </div>
 
-            <!-- スライド選択ドロップダウン & 全画面表示ボタン -->
             <div class="flex items-center space-x-3">
-                <!-- 目次ドロップダウン -->
                 <div class="relative">
-                    <select id="slide-select" class="bg-slate-100 border border-slate-300 text-sm font-semibold rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm">
-                        <option value="0">1. タイトル ＆ 本日の内容</option>
-                        <option value="1">2. 【なぜ学ぶか】制御技術の必要性</option>
-                        <option value="2">3. 【学習目標】本日のめあて</option>
-                        <option value="3">4. 【身近な例】身近な家電製品</option>
-                        <option value="4">5. 【仕組み】3大要素とフィードバック制御</option>
-                        <option value="5">6. 【メリット・デメリット】比較検討</option>
-                        <option value="6">7. 【歴史・背景】制御技術の進化</option>
-                        <option value="7">8. 【体験シミュレーション】自動運転ブレーキ制御</option>
-                        <option value="8">9. 【社会での使われ方】産業・社会の事例</option>
-                        <option value="9">10. 【理解度チェック】確認クイズ</option>
-                        <option value="10">11. 【今日のポイント】おさらい ＆ 未来の課題</option>
-                        <option value="11">12. 【発展学習】アルゴロジックで実践！</option>
+                    <select id="slide-select" aria-label="スライド目次" class="bg-slate-100 border-2 border-slate-300 text-sm md:text-base font-bold rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm">
+                        <option value="0">1. タイトル ＆ 今日の流れ</option>
+                        <option value="1">2. 【なぜ学ぶか】自動化の理由とグラフ</option>
+                        <option value="2">3. 【学習目標】今日のめあて</option>
+                        <option value="3">4. 【身近な例】動くイラストで見る家電</option>
+                        <option value="4">5. 【仕組み】3大要素とリアルタイムグラフ</option>
+                        <option value="5">6. 【長所と注意点】メリット・デメリット図解</option>
+                        <option value="6">7. 【体験テスト】自動運転ブレーキ制御</option>
+                        <option value="7">8. 【社会での活躍】産業・社会の事例</option>
+                        <option value="8">9. 【理解度チェック】確認クイズ</option>
+                        <option value="9">10. 【今日のポイント】まとめ図解 ＆ 未来の課題</option>
+                        <option value="10">11. 【発展学習】アルゴロジックで実践！</option>
                     </select>
                 </div>
 
-                <!-- フルスクリーン切替ボタン -->
-                <button id="fullscreen-btn" title="全画面表示の切替" class="bg-slate-100 hover:bg-slate-200 p-2 rounded-lg border border-slate-300 text-slate-700 transition">
+                <button id="fullscreen-btn" title="全画面表示の切替" class="bg-slate-100 hover:bg-slate-200 px-3.5 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold transition flex items-center gap-1.5">
                     <i class="fa-solid fa-expand text-base"></i>
+                    <span class="text-xs hidden md:inline">全画面</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- ==================== メインコンテンツ領域 (12スライド) ==================== -->
+    <!-- ==================== メインコンテンツ領域 (全11スライド) ==================== -->
     <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6 flex flex-col justify-center">
 
-        <!-- ===== Slide 1: タイトル & 本日の流れ ===== -->
+        <!-- ===== Slide 1: タイトル & 動くイラスト ===== -->
         <section id="slide-0" class="slide-container hidden">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
                 <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 01 / 12</span>
-                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-3 py-1 rounded-full font-bold">オリエンテーション</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 01 / 11</span>
+                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">オリエンテーション</span>
                 </div>
 
-                <div class="text-center py-4 space-y-3">
-                    <div class="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full mb-1">技術分野：材料・育成・エネルギー・情報</div>
-                    <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">計測・制御の仕組みを学ぼう</h2>
-                    <p class="text-slate-600 text-base md:text-lg font-medium max-w-2xl mx-auto">
-                        コンピュータとセンサーが、機械をどのように判断・動かしているのか？その秘密を解き明かします。
-                    </p>
+                <div class="grid md:grid-cols-5 gap-6 items-center py-2">
+                    <div class="md:col-span-3 space-y-3 text-center md:text-left">
+                        <div class="inline-block bg-blue-100 text-blue-800 text-xs md:text-sm font-bold px-3.5 py-1 rounded-full">技術分野：情報の技術（計測・制御）</div>
+                        <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                            <ruby>計測<rt>けいそく</rt></ruby>・<ruby>制御<rt>せいぎょ</rt></ruby>のしくみを<br class="hidden sm:inline">動かして学ぼう！
+                        </h2>
+                        <p class="text-slate-700 text-base md:text-lg font-medium">
+                            機械はどうやって周りの様子に気づき、自分で考えて動いているの？図やグラフ、シミュレーションで秘密を解き明かそう！
+                        </p>
+                    </div>
+
+                    <!-- 動くSVGイラスト：ロボット＆センサー波 -->
+                    <div class="md:col-span-2 flex justify-center">
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-4 w-full max-w-xs flex flex-col items-center shadow-inner">
+                            <svg viewBox="0 0 240 170" class="w-full h-40 animate-float">
+                                <!-- センサー電波 -->
+                                <circle cx="120" cy="48" r="18" fill="none" stroke="#06b6d4" stroke-width="2.5" class="animate-radar"/>
+                                <circle cx="120" cy="48" r="18" fill="none" stroke="#3b82f6" stroke-width="2" style="animation-delay:0.8s" class="animate-radar"/>
+                                <!-- アンテナ -->
+                                <line x1="120" y1="62" x2="120" y2="48" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+                                <circle cx="120" cy="46" r="6" fill="#06b6d4"/>
+                                <!-- ロボット頭 -->
+                                <rect x="75" y="62" width="90" height="58" rx="14" fill="#2563eb"/>
+                                <rect x="85" y="74" width="70" height="34" rx="8" fill="#0f172a"/>
+                                <!-- 光る目 -->
+                                <circle cx="104" cy="91" r="7" fill="#38bdf8"/>
+                                <circle cx="136" cy="91" r="7" fill="#38bdf8"/>
+                                <!-- 体 -->
+                                <rect x="85" y="124" width="70" height="34" rx="8" fill="#64748b"/>
+                                <rect x="102" y="132" width="36" height="18" rx="4" fill="#10b981"/>
+                                <!-- 腕 -->
+                                <rect x="56" y="126" width="22" height="10" rx="5" fill="#94a3b8"/>
+                                <rect x="162" y="126" width="22" height="10" rx="5" fill="#94a3b8"/>
+                            </svg>
+                            <span class="text-xs font-bold text-blue-800 bg-white px-3 py-1 rounded-full border border-blue-200 shadow-sm">
+                                📡 測る（計測）➔ 🧠 判断 ➔ 🦾 動く（制御）
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 本日の授業アジェンダ -->
+                <!-- 今日の学習ロードマップ -->
                 <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-blue-600"></i> 本日の学習の流れ（全12ステップ）
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-blue-600"></i> 今日の学習ロードマップ（全11ステップ）
                     </h3>
-                    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs font-bold text-slate-700">
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-center gap-2">
-                            <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs">1</span>
-                            <span>なぜ学ぶか ＆ めあて</span>
+                    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm font-bold text-slate-700">
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center gap-3">
+                            <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center shrink-0">1</span>
+                            <span>なぜ学ぶか（データグラフ）</span>
                         </div>
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-center gap-2">
-                            <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs">2</span>
-                            <span>身近な例 ＆ 3大要素</span>
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center gap-3">
+                            <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center shrink-0">2</span>
+                            <span>動くイラストで見る家電</span>
                         </div>
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-center gap-2">
-                            <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs">3</span>
-                            <span>フィードバック制御 ＆ 歴史</span>
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center gap-3">
+                            <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center shrink-0">3</span>
+                            <span>フィードバック制御グラフ</span>
                         </div>
-                        <div class="bg-emerald-50 border border-emerald-300 text-emerald-900 p-3 rounded-lg flex items-center gap-2">
-                            <span class="bg-emerald-600 text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs font-bold">4</span>
-                            <span>🚗 ブレーキ制御テスト</span>
+                        <div class="bg-emerald-50 border-2 border-emerald-400 text-emerald-950 p-3.5 rounded-xl flex items-center gap-3">
+                            <span class="bg-emerald-600 text-white w-7 h-7 rounded-full flex items-center justify-center shrink-0">4</span>
+                            <span>🚗 自動ブレーキ実験</span>
                         </div>
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-center gap-2">
-                            <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs">5</span>
-                            <span>社会での活用 ＆ クイズ</span>
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center gap-3">
+                            <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center shrink-0">5</span>
+                            <span>社会での活躍 ＆ クイズ</span>
                         </div>
-                        <div class="bg-indigo-600 text-white p-3 rounded-lg flex items-center gap-2 shadow-sm">
-                            <span class="bg-white text-indigo-800 w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs font-bold">6</span>
-                            <span>🎮 発展：アルゴロジック！</span>
+                        <div class="bg-indigo-600 text-white p-3.5 rounded-xl flex items-center gap-3 shadow-sm">
+                            <span class="bg-white text-indigo-800 w-7 h-7 rounded-full flex items-center justify-center shrink-0">6</span>
+                            <span>🎮 アルゴロジックに挑戦！</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ===== Slide 2: 【なぜ学ぶか】 ===== -->
+        <!-- ===== Slide 2: 【なぜ学ぶか】グラフ付き ===== -->
         <section id="slide-1" class="slide-container hidden">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
                 <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 02 / 12</span>
-                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-3 py-1 rounded-full font-bold">導入・学ぶ理由</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 02 / 11</span>
+                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">導入・学ぶ理由</span>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-3">
-                    <i class="fa-solid fa-lightbulb text-amber-500"></i> なぜ今「計測と制御」を学ぶのか？
+                    <i class="fa-solid fa-chart-line text-blue-600"></i> なぜ今「計測と制御」が重要なの？
                 </h2>
-                <p class="text-slate-700 text-base md:text-lg leading-relaxed font-medium">
-                    私たちの身の回りには、エアコン、自動ドア、ロボット掃除機など、<strong class="text-blue-700 font-bold underline decoration-blue-400 decoration-2">人が手で操作しなくても自動で状況を判断して動く製品</strong>があふれています。
-                </p>
 
-                <div class="grid md:grid-cols-3 gap-4 my-6">
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 card-interactive">
-                        <div class="text-blue-600 text-3xl mb-2"><i class="fa-solid fa-temperature-arrow-down"></i></div>
-                        <h3 class="font-bold text-blue-900 text-lg mb-1">快適な環境の維持</h3>
-                        <p class="text-xs text-slate-600">室温をセンサーで常に計測し、エアコンの強さをコントロールして最適な温度を保ちます。</p>
-                    </div>
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 card-interactive">
-                        <div class="text-blue-600 text-3xl mb-2"><i class="fa-solid fa-car-burst"></i></div>
-                        <h3 class="font-bold text-blue-900 text-lg mb-1">事故を防ぐ安全技術</h3>
-                        <p class="text-xs text-slate-600">自動運転車は障害物をセンサーで感知し、危険を察知すると自動でブレーキをかけます。</p>
-                    </div>
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 card-interactive">
-                        <div class="text-blue-600 text-3xl mb-2"><i class="fa-solid fa-leaf"></i></div>
-                        <h3 class="font-bold text-blue-900 text-lg mb-1">省エネと持続可能な社会</h3>
-                        <p class="text-xs text-slate-600">無駄な電力の消費を自動で抑え、地球環境の保全やスマート農業を支えています。</p>
-                    </div>
-                </div>
+                <div class="grid md:grid-cols-2 gap-6 items-center">
+                    <div class="space-y-4">
+                        <p class="text-slate-700 text-base md:text-lg leading-relaxed font-medium">
+                            日本では少子高齢化による<strong>人手不足</strong>や、地球温暖化を防ぐための<strong>省エネ</strong>が大きな課題になっています。そのため、機械が自動で判断して動く「計測・制御技術」が急速に広がっています。
+                        </p>
 
-                <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-xl">
-                    <p class="text-blue-950 font-bold text-sm md:text-base">
-                        👉 機械を使うユーザーから<strong>「機械がどうやって状況を測り、どう判断して動いているか」という仕組みを理解し活用する側</strong>へ成長しましょう！
-                    </p>
+                        <div class="space-y-3">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center gap-3">
+                                <div class="bg-cyan-100 text-cyan-700 p-3 rounded-xl text-xl"><i class="fa-solid fa-temperature-arrow-down"></i></div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-base">快適さ ＆ 省エネの両立</h3>
+                                    <p class="text-sm text-slate-600">必要なときだけ自動で動かし、ムダな電気をカット！</p>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center gap-3">
+                                <div class="bg-rose-100 text-rose-700 p-3 rounded-xl text-xl"><i class="fa-solid fa-car-burst"></i></div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-base">交通事故ゼロを目指す安全技術</h3>
+                                    <p class="text-sm text-slate-600">自動ブレーキ搭載車の普及で追突事故が大幅に減少！</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart.js 棒グラフ：自動ブレーキ搭載による事故減少イメージ -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                        <h3 class="text-sm font-bold text-slate-800 text-center">📊 計測制御（自動ブレーキ）の有無による追突事故率の比較（イメージ）</h3>
+                        <div class="h-52 relative">
+                            <canvas id="why-learn-chart"></canvas>
+                        </div>
+                        <p class="text-xs text-slate-500 text-center">※ 自動ブレーキ搭載車は非搭載車に比べ、追突事故が約6割減少するデータも報告されています。</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -216,204 +279,273 @@
         <section id="slide-2" class="slide-container hidden">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
                 <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 03 / 12</span>
-                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-3 py-1 rounded-full font-bold">学習目標</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 03 / 11</span>
+                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">学習目標</span>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-3">
-                    <i class="fa-solid fa-bullseye text-blue-600"></i> 本日の学習ゴール（めあて）
+                    <i class="fa-solid fa-bullseye text-blue-600"></i> 今日の学習ゴール（めあて）
                 </h2>
 
-                <div class="space-y-4 my-6">
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 flex items-start space-x-4">
-                        <div class="bg-blue-600 text-white font-bold rounded-lg px-3 py-1 text-xs shrink-0 mt-0.5">目標 1</div>
-                        <div>
-                            <h3 class="font-bold text-base md:text-lg text-slate-900">計測・制御の3大構成要素を説明できる</h3>
-                            <p class="text-slate-600 text-xs md:text-sm mt-1">「センサー（目）」、「制御部（頭脳）」、「アクチュエータ（手足）」の役割と関係性を正しく理解する。</p>
+                <div class="space-y-4 my-2">
+                    <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-200 flex items-center space-x-4">
+                        <div class="bg-blue-600 text-white font-black rounded-xl px-4 py-2.5 text-base shrink-0">目標 1</div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-lg md:text-xl text-slate-900">計測・制御の「3つの要素」を図で説明できる</h3>
+                            <p class="text-slate-700 text-sm md:text-base mt-1">「センサー（目・耳）」「<ruby>制御部<rt>せいぎょぶ</rt></ruby>（頭脳）」「アクチュエータ（手足）」の役割をつかもう。</p>
+                        </div>
+                        <div class="hidden sm:flex text-3xl text-blue-600 gap-2">
+                            <i class="fa-solid fa-eye"></i><i class="fa-solid fa-brain"></i><i class="fa-solid fa-robot"></i>
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 flex items-start space-x-4">
-                        <div class="bg-blue-600 text-white font-bold rounded-lg px-3 py-1 text-xs shrink-0 mt-0.5">目標 2</div>
-                        <div>
-                            <h3 class="font-bold text-base md:text-lg text-slate-900">フィードバック制御のしくみを理解する</h3>
-                            <p class="text-slate-600 text-xs md:text-sm mt-1">結果を測って目標値と比較し、絶えず補正し続けるループ制御の原理を理解する。</p>
+                    <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-200 flex items-center space-x-4">
+                        <div class="bg-blue-600 text-white font-black rounded-xl px-4 py-2.5 text-base shrink-0">目標 2</div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-lg md:text-xl text-slate-900">「フィードバック制御」の動きをグラフで理解する</h3>
+                            <p class="text-slate-700 text-sm md:text-base mt-1">目標の温度に近づくまで、自動で何度も微調整するループのしくみを見よう。</p>
+                        </div>
+                        <div class="hidden sm:flex text-3xl text-emerald-600">
+                            <i class="fa-solid fa-arrows-spin"></i>
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 flex items-start space-x-4">
-                        <div class="bg-blue-600 text-white font-bold rounded-lg px-3 py-1 text-xs shrink-0 mt-0.5">目標 3</div>
-                        <div>
-                            <h3 class="font-bold text-base md:text-lg text-slate-900">試行錯誤を通じて制御プログラムの重要性に気づく</h3>
-                            <p class="text-slate-600 text-xs md:text-sm mt-1">シミュレーターで「なぜ失敗したか」を考え、適切なパラメーターに調整して安全に停止させる体験をする。</p>
+                    <div class="bg-slate-50 p-5 rounded-2xl border-2 border-slate-200 flex items-center space-x-4">
+                        <div class="bg-blue-600 text-white font-black rounded-xl px-4 py-2.5 text-base shrink-0">目標 3</div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-lg md:text-xl text-slate-900">試行錯誤しながらプログラムを調整できる</h3>
+                            <p class="text-slate-700 text-sm md:text-base mt-1">自動運転シミュレーターで失敗から原因を考え、数値を工夫して安全に車を止めよう。</p>
+                        </div>
+                        <div class="hidden sm:flex text-3xl text-amber-500">
+                            <i class="fa-solid fa-car-side"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ===== Slide 4: 【身近な例】 ===== -->
+        <!-- ===== Slide 4: 【身近な例】動くイラスト付き ===== -->
         <section id="slide-3" class="slide-container hidden">
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-5">
                 <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 04 / 12</span>
-                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-3 py-1 rounded-full font-bold">身近な実例</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 04 / 11</span>
+                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">身近な実例</span>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-magnifying-glass text-blue-600"></i> 生活の中にある計測・制御家電
+                    <i class="fa-solid fa-magnifying-glass text-blue-600"></i> 動くイラストで見る！身近な計測・制御家電
                 </h2>
-                <p class="text-slate-600 text-xs md:text-sm">
-                    カードをタップ・クリックすると、それぞれの家電で使われている「センサー」「制御部」「アクチュエータ」の内訳が開きます。
+                <p class="text-slate-700 text-sm md:text-base font-medium">
+                    👇 カードを<strong>タップ（クリック）</strong>すると、中の「3つの部品」のくわしい説明が開きます！
                 </p>
 
-                <!-- 4つのカードグリッド -->
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- 1. エアコン -->
-                    <div onclick="toggleExampleCard(this)" class="bg-slate-50 border border-slate-300 hover:border-blue-500 rounded-xl p-4 cursor-pointer card-interactive transition group">
-                        <div class="flex justify-between items-center mb-3">
-                            <i class="fa-solid fa-snowflake text-2xl text-cyan-600"></i>
-                            <span class="text-[11px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">タップで開閉</span>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <!-- 1. エアコン（動くイラスト付き） -->
+                    <button type="button" onclick="toggleExampleCard(this)" class="text-left bg-slate-50 border-2 border-slate-300 hover:border-blue-500 rounded-2xl p-4 cursor-pointer card-interactive transition group">
+                        <div class="flex items-center gap-4">
+                            <!-- 動くSVG：エアコンと涼風 -->
+                            <svg viewBox="0 0 90 70" class="w-20 h-16 shrink-0 bg-cyan-50 rounded-xl border border-cyan-200 p-1">
+                                <rect x="10" y="10" width="70" height="24" rx="5" fill="#ffffff" stroke="#0891b2" stroke-width="2.5"/>
+                                <line x1="18" y1="28" x2="72" y2="28" stroke="#06b6d4" stroke-width="2"/>
+                                <path d="M25 38 Q20 48 25 58" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" class="animate-flow"/>
+                                <path d="M45 38 Q40 48 45 58" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" class="animate-flow"/>
+                                <path d="M65 38 Q60 48 65 58" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" class="animate-flow"/>
+                            </svg>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-bold text-lg md:text-xl text-slate-900 group-hover:text-blue-600">エアコン</h3>
+                                    <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">タップで詳細</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mt-0.5">室温を測って風の強さを自動調整</p>
+                            </div>
                         </div>
-                        <h3 class="font-bold text-base text-slate-900 mb-1 group-hover:text-blue-600">エアコン</h3>
-                        <p class="text-xs text-slate-500 mb-2">設定温度に合わせて冷暖房の強さを自動調整</p>
-                        <div class="example-details hidden text-xs border-t border-slate-200 pt-3 space-y-1.5 text-slate-700">
-                            <div><strong class="text-cyan-700">・センサー:</strong> 室温サーミスタ・人感センサー</div>
-                            <div><strong class="text-amber-700">・制御部:</strong> インバーターマイコン基板</div>
-                            <div><strong class="text-emerald-700">・アクチュエータ:</strong> コンプレッサー・送風ファン</div>
+                        <div class="example-details hidden text-sm border-t border-slate-200 mt-3 pt-3 space-y-1.5 text-slate-800">
+                            <div><strong class="text-cyan-700">📡 センサー:</strong> 温度センサー（室温を測る）・人感センサー</div>
+                            <div><strong class="text-amber-700">🧠 制御部:</strong> マイクロコンピュータ（設定温度との差を計算）</div>
+                            <div><strong class="text-emerald-700">🦾 アクチュエータ:</strong> ファンモーター（風を送る）・冷やす装置</div>
                         </div>
-                    </div>
+                    </button>
 
-                    <!-- 2. 自動ドア -->
-                    <div onclick="toggleExampleCard(this)" class="bg-slate-50 border border-slate-300 hover:border-blue-500 rounded-xl p-4 cursor-pointer card-interactive transition group">
-                        <div class="flex justify-between items-center mb-3">
-                            <i class="fa-solid fa-door-open text-2xl text-amber-600"></i>
-                            <span class="text-[11px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">タップで開閉</span>
+                    <!-- 2. 自動ドア（動くイラスト付き） -->
+                    <button type="button" onclick="toggleExampleCard(this)" class="text-left bg-slate-50 border-2 border-slate-300 hover:border-blue-500 rounded-2xl p-4 cursor-pointer card-interactive transition group">
+                        <div class="flex items-center gap-4">
+                            <!-- 動くSVG：センサー波とドア -->
+                            <svg viewBox="0 0 90 70" class="w-20 h-16 shrink-0 bg-amber-50 rounded-xl border border-amber-200 p-1">
+                                <rect x="14" y="14" width="28" height="46" fill="#bae6fd" stroke="#0284c7" stroke-width="2"/>
+                                <rect x="48" y="14" width="28" height="46" fill="#bae6fd" stroke="#0284c7" stroke-width="2"/>
+                                <circle cx="45" cy="10" r="4" fill="#f59e0b"/>
+                                <path d="M45 14 L26 55 L64 55 Z" fill="rgba(245,158,11,0.22)"/>
+                                <path d="M24 36 L16 36 M66 36 L74 36" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-bold text-lg md:text-xl text-slate-900 group-hover:text-blue-600">自動ドア</h3>
+                                    <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">タップで詳細</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mt-0.5">赤外線で人を感知して安全に開閉</p>
+                            </div>
                         </div>
-                        <h3 class="font-bold text-base text-slate-900 mb-1 group-hover:text-blue-600">自動ドア</h3>
-                        <p class="text-xs text-slate-500 mb-2">人が近づくと赤外線で感知し安全に開閉</p>
-                        <div class="example-details hidden text-xs border-t border-slate-200 pt-3 space-y-1.5 text-slate-700">
-                            <div><strong class="text-cyan-700">・センサー:</strong> 赤外線反射・光電センサー</div>
-                            <div><strong class="text-amber-700">・制御部:</strong> ドアコントローラー</div>
-                            <div><strong class="text-emerald-700">・アクチュエータ:</strong> 開閉駆動用電動モーター</div>
+                        <div class="example-details hidden text-sm border-t border-slate-200 mt-3 pt-3 space-y-1.5 text-slate-800">
+                            <div><strong class="text-cyan-700">📡 センサー:</strong> <ruby>赤外線<rt>せきがいせん</rt></ruby>センサー（人の接近を感知）</div>
+                            <div><strong class="text-amber-700">🧠 制御部:</strong> ドア制御コンピュータ（開閉のタイミングを判断）</div>
+                            <div><strong class="text-emerald-700">🦾 アクチュエータ:</strong> 電動モーター（ドアを動かして開け閉めする）</div>
                         </div>
-                    </div>
+                    </button>
 
-                    <!-- 3. 温水洗浄便座 -->
-                    <div onclick="toggleExampleCard(this)" class="bg-slate-50 border border-slate-300 hover:border-blue-500 rounded-xl p-4 cursor-pointer card-interactive transition group">
-                        <div class="flex justify-between items-center mb-3">
-                            <i class="fa-solid fa-toilet text-2xl text-emerald-600"></i>
-                            <span class="text-[11px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">タップで開閉</span>
+                    <!-- 3. ロボット掃除機（動くイラスト付き） -->
+                    <button type="button" onclick="toggleExampleCard(this)" class="text-left bg-slate-50 border-2 border-slate-300 hover:border-blue-500 rounded-2xl p-4 cursor-pointer card-interactive transition group">
+                        <div class="flex items-center gap-4">
+                            <!-- 動くSVG：ロボット掃除機と障害物検知 -->
+                            <svg viewBox="0 0 90 70" class="w-20 h-16 shrink-0 bg-emerald-50 rounded-xl border border-emerald-200 p-1">
+                                <rect x="72" y="14" width="8" height="42" rx="2" fill="#e11d48"/>
+                                <circle cx="36" cy="36" r="18" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+                                <circle cx="36" cy="36" r="7" fill="#10b981"/>
+                                <path d="M54 36 L70 24 M54 36 L70 36 M54 36 L70 48" stroke="#06b6d4" stroke-width="2" class="animate-flow"/>
+                            </svg>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-bold text-lg md:text-xl text-slate-900 group-hover:text-blue-600">ロボット掃除機</h3>
+                                    <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">タップで詳細</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mt-0.5">壁や段差をよけながら部屋中をお掃除</p>
+                            </div>
                         </div>
-                        <h3 class="font-bold text-base text-slate-900 mb-1 group-hover:text-blue-600">温水洗浄便座</h3>
-                        <p class="text-xs text-slate-500 mb-2">着座をセンサーで検知し便座保温や水温を維持</p>
-                        <div class="example-details hidden text-xs border-t border-slate-200 pt-3 space-y-1.5 text-slate-700">
-                            <div><strong class="text-cyan-700">・センサー:</strong> 着座センサー・温感サーミスタ</div>
-                            <div><strong class="text-amber-700">・制御部:</strong> 水温・便座温調マイコン</div>
-                            <div><strong class="text-emerald-700">・アクチュエータ:</strong> 温水ヒーター・ノズル伸縮モーター</div>
+                        <div class="example-details hidden text-sm border-t border-slate-200 mt-3 pt-3 space-y-1.5 text-slate-800">
+                            <div><strong class="text-cyan-700">📡 センサー:</strong> 距離センサー・段差センサー・ゴミ検知センサー</div>
+                            <div><strong class="text-amber-700">🧠 制御部:</strong> 走行ルート計算マイコン（進路や吸引力を判断）</div>
+                            <div><strong class="text-emerald-700">🦾 アクチュエータ:</strong> 車輪モーター・回転ブラシ・吸引ファン</div>
                         </div>
-                    </div>
+                    </button>
 
-                    <!-- 4. 全自動洗濯機 -->
-                    <div onclick="toggleExampleCard(this)" class="bg-slate-50 border border-slate-300 hover:border-blue-500 rounded-xl p-4 cursor-pointer card-interactive transition group">
-                        <div class="flex justify-between items-center mb-3">
-                            <i class="fa-solid fa-soap text-2xl text-indigo-600"></i>
-                            <span class="text-[11px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded border border-blue-200">タップで開閉</span>
+                    <!-- 4. 全自動洗濯機（動くイラスト付き） -->
+                    <button type="button" onclick="toggleExampleCard(this)" class="text-left bg-slate-50 border-2 border-slate-300 hover:border-blue-500 rounded-2xl p-4 cursor-pointer card-interactive transition group">
+                        <div class="flex items-center gap-4">
+                            <!-- 動くSVG：洗濯機ドラム回転 -->
+                            <svg viewBox="0 0 90 70" class="w-20 h-16 shrink-0 bg-indigo-50 rounded-xl border border-indigo-200 p-1">
+                                <rect x="22" y="8" width="46" height="54" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="2.5"/>
+                                <circle cx="45" cy="40" r="15" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/>
+                                <g class="fan-slow" style="transform-origin: 45px 40px;">
+                                    <path d="M35 40 Q45 30 55 40 Q45 50 35 40" fill="#6366f1"/>
+                                </g>
+                            </svg>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-bold text-lg md:text-xl text-slate-900 group-hover:text-blue-600">全自動洗濯機</h3>
+                                    <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">タップで詳細</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mt-0.5">服の重さを測って水の量を自動決定</p>
+                            </div>
                         </div>
-                        <h3 class="font-bold text-base text-slate-900 mb-1 group-hover:text-blue-600">全自動洗濯機</h3>
-                        <p class="text-xs text-slate-500 mb-2">服の布量・重さを計測して最適な水量を自動決定</p>
-                        <div class="example-details hidden text-xs border-t border-slate-200 pt-3 space-y-1.5 text-slate-700">
-                            <div><strong class="text-cyan-700">・センサー:</strong> 重量・水位・回転数センサー</div>
-                            <div><strong class="text-amber-700">・制御部:</strong> 洗濯プログラムマイコン</div>
-                            <div><strong class="text-emerald-700">・アクチュエータ:</strong> 給排水ソレノイド弁・モーター</div>
+                        <div class="example-details hidden text-sm border-t border-slate-200 mt-3 pt-3 space-y-1.5 text-slate-800">
+                            <div><strong class="text-cyan-700">📡 センサー:</strong> 重さセンサー・<ruby>水位<rt>すいい</rt></ruby>センサー（水の高さ）</div>
+                            <div><strong class="text-amber-700">🧠 制御部:</strong> 洗濯プログラムマイコン（洗い・すすぎ・脱水を管理）</div>
+                            <div><strong class="text-emerald-700">🦾 アクチュエータ:</strong> 給水バルブ（水の栓）・洗濯槽を回すモーター</div>
                         </div>
-                    </div>
+                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- ===== Slide 5: 【仕組み】 ===== -->
+        <!-- ===== Slide 5: 【仕組み】動くループ図＆リアルタイム折れ線グラフ ===== -->
         <section id="slide-4" class="slide-container hidden">
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
-                <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 05 / 12</span>
-                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-3 py-1 rounded-full font-bold">制御の仕組み</span>
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-5">
+                <div class="border-b border-slate-200 pb-3 flex items-center justify-between">
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 05 / 11</span>
+                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">制御の仕組み</span>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-gears text-blue-600"></i> 計測制御の3大要素とフィードバック
+                    <i class="fa-solid fa-gears text-blue-600"></i> 計測制御の「3大要素」とフィードバック制御
                 </h2>
 
-                <!-- 構成要素図解 -->
-                <div class="bg-slate-50 p-5 rounded-xl border border-slate-300 space-y-4">
-                    <h3 class="text-xs font-bold text-slate-600 text-center tracking-wider">【 計測制御システムの基本3大要素と情報の流れ 】</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-center items-center">
-                        <!-- 1. 入力 / 目標 -->
-                        <div class="bg-white border-2 border-blue-500 p-3 rounded-lg shadow-sm">
-                            <span class="text-[11px] text-blue-600 font-bold block mb-1">① 入力 / 設定</span>
-                            <span class="font-bold text-slate-900 text-sm">目標値 (例: 24℃)</span>
-                        </div>
+                <!-- SVGアニメーション付きループ図 -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-300">
+                    <svg viewBox="0 0 760 155" class="w-full h-36 md:h-40">
+                        <!-- 接続線（アニメーション） -->
+                        <line x1="155" y1="65" x2="215" y2="65" stroke="#2563eb" stroke-width="3.5" class="animate-flow"/>
+                        <line x1="365" y1="65" x2="425" y2="65" stroke="#d97706" stroke-width="3.5" class="animate-flow"/>
+                        <line x1="575" y1="65" x2="625" y2="65" stroke="#059669" stroke-width="3.5" class="animate-flow"/>
+                        <!-- フィードバック戻り矢印 -->
+                        <path d="M 685 105 L 685 138 L 290 138 L 290 108" fill="none" stroke="#0891b2" stroke-width="3.5" class="animate-flow"/>
+                        <polygon points="290,103 284,113 296,113" fill="#0891b2"/>
+                        <rect x="380" y="124" width="215" height="24" rx="12" fill="#cffafe" stroke="#0891b2" stroke-width="1.5"/>
+                        <text x="487" y="140" text-anchor="middle" font-size="12" font-weight="bold" fill="#164e63">🔄 フィードバック（結果を戻して比べる）</text>
 
-                        <!-- 2. 制御部 -->
-                        <div class="bg-amber-50 border-2 border-amber-500 p-3 rounded-lg shadow-sm">
-                            <span class="text-[11px] text-amber-800 font-bold block mb-1"><i class="fa-solid fa-brain"></i> ② 判断 (頭脳)</span>
-                            <span class="font-bold text-slate-900 text-sm">制御部 (マイコン)</span>
-                            <p class="text-[11px] text-slate-600 mt-0.5">ズレを計算して命令を送る</p>
-                        </div>
+                        <!-- ① 目標値 -->
+                        <rect x="15" y="25" width="140" height="80" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="3"/>
+                        <text x="85" y="48" text-anchor="middle" font-size="12" font-weight="bold" fill="#2563eb">① 入力 / 設定</text>
+                        <text x="85" y="70" text-anchor="middle" font-size="15" font-weight="900" fill="#0f172a">目標値</text>
+                        <text x="85" y="90" text-anchor="middle" font-size="11" fill="#475569">例：設定温度 24℃</text>
 
-                        <!-- 3. アクチュエータ -->
-                        <div class="bg-emerald-50 border-2 border-emerald-500 p-3 rounded-lg shadow-sm">
-                            <span class="text-[11px] text-emerald-800 font-bold block mb-1"><i class="fa-solid fa-robot"></i> ③ 動作 (手足)</span>
-                            <span class="font-bold text-slate-900 text-sm">アクチュエータ</span>
-                            <p class="text-[11px] text-slate-600 mt-0.5">モーター・ヒーター等</p>
-                        </div>
+                        <!-- ② 制御部 -->
+                        <rect x="215" y="25" width="150" height="80" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="3"/>
+                        <text x="290" y="48" text-anchor="middle" font-size="12" font-weight="bold" fill="#b45309">② 判断（頭脳）</text>
+                        <text x="290" y="70" text-anchor="middle" font-size="15" font-weight="900" fill="#0f172a">制御部(マイコン)</text>
+                        <text x="290" y="90" text-anchor="middle" font-size="11" fill="#475569">ズレを計算して命令</text>
 
-                        <!-- 4. センサー -->
-                        <div class="bg-cyan-50 border-2 border-cyan-500 p-3 rounded-lg shadow-sm">
-                            <span class="text-[11px] text-cyan-800 font-bold block mb-1"><i class="fa-solid fa-eye"></i> ④ 計測 (目・耳)</span>
-                            <span class="font-bold text-slate-900 text-sm">センサー</span>
-                            <p class="text-[11px] text-slate-600 mt-0.5">現在の状態を常に測定する</p>
-                        </div>
-                    </div>
+                        <!-- ③ アクチュエータ -->
+                        <rect x="425" y="25" width="150" height="80" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="3"/>
+                        <text x="500" y="48" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">③ 動作（手足）</text>
+                        <text x="500" y="70" text-anchor="middle" font-size="15" font-weight="900" fill="#0f172a">アクチュエータ</text>
+                        <text x="500" y="90" text-anchor="middle" font-size="11" fill="#475569">モーター・ファン等</text>
 
-                    <div class="text-xs text-blue-950 bg-blue-100/80 p-3 rounded-lg border border-blue-200 text-center font-medium">
-                        🔄 <strong>フィードバック制御:</strong> ④センサーの計測結果を①目標値と比較し、ズレを補正するように絶えず調整を繰り返すループ動作！
-                    </div>
+                        <!-- ④ センサー -->
+                        <rect x="625" y="25" width="120" height="80" rx="12" fill="#ecfeff" stroke="#06b6d4" stroke-width="3"/>
+                        <text x="685" y="48" text-anchor="middle" font-size="12" font-weight="bold" fill="#0e7490">④ 計測（目）</text>
+                        <text x="685" y="70" text-anchor="middle" font-size="15" font-weight="900" fill="#0f172a">センサー</text>
+                        <text x="685" y="90" text-anchor="middle" font-size="11" fill="#475569">今の温度を測る</text>
+                    </svg>
                 </div>
 
-                <!-- リアルタイム室温調整ミニ体験 -->
-                <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-200 space-y-3">
+                <!-- リアルタイム室温調整ミニ体験 ＋ 折れ線グラフ -->
+                <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-200 space-y-3">
                     <div class="flex justify-between items-center flex-wrap gap-2">
-                        <span class="font-bold text-sm text-blue-900"><i class="fa-solid fa-flask"></i> リアルタイム室温調整ミニ体験</span>
-                        <span id="temp-status-badge" class="text-xs px-2.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">安定維持中</span>
+                        <span class="font-bold text-base text-blue-950"><i class="fa-solid fa-chart-area text-blue-600"></i> 体験：スライダーを動かして室温グラフの変化を見よう！</span>
+                        <span id="temp-status-badge" class="text-xs md:text-sm px-3 py-1 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">安定維持中</span>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-4 items-center">
-                        <div class="space-y-2">
-                            <div>
-                                <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                                    <span>外気温（外からの変化）:</span>
-                                    <span id="env-temp-val" class="text-amber-700 font-bold">33 ℃</span>
+                    <div class="grid md:grid-cols-12 gap-4 items-center">
+                        <!-- 左：スライダー＆回転ファンアニメ -->
+                        <div class="md:col-span-6 space-y-3">
+                            <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                <div class="flex justify-between text-sm font-bold text-slate-700 mb-1">
+                                    <span>☀️ 外の気温（暑さ・寒さ）:</span>
+                                    <span id="env-temp-val" class="text-amber-700 font-black">33 ℃</span>
                                 </div>
-                                <input type="range" id="env-temp-slider" min="10" max="40" value="33" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                                <input type="range" id="env-temp-slider" min="10" max="40" value="33" class="w-full bg-slate-200 rounded-lg appearance-none cursor-pointer">
                             </div>
 
-                            <div>
-                                <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                                    <span>設定目標温度:</span>
-                                    <span id="target-temp-val" class="text-blue-700 font-bold">24 ℃</span>
+                            <div class="bg-white p-3 rounded-xl border border-slate-200">
+                                <div class="flex justify-between text-sm font-bold text-slate-700 mb-1">
+                                    <span>🎯 設定温度（目標値）:</span>
+                                    <span id="target-temp-val" class="text-blue-700 font-black">24 ℃</span>
                                 </div>
-                                <input type="range" id="target-temp-slider" min="18" max="30" value="24" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                                <input type="range" id="target-temp-slider" min="18" max="30" value="24" class="w-full bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+
+                            <!-- リアルタイム数値＆動くファン -->
+                            <div class="bg-white p-3 rounded-xl flex items-center justify-around text-center border border-slate-300 shadow-sm">
+                                <div>
+                                    <div class="text-xs text-slate-500 font-bold">📡 今の室温</div>
+                                    <div id="current-room-temp" class="text-2xl font-black text-slate-900">24.0 ℃</div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg viewBox="0 0 40 40" class="w-9 h-9">
+                                        <g id="fan-blades" class="fan-slow" style="transform-origin: 20px 20px;">
+                                            <circle cx="20" cy="20" r="4" fill="#2563eb"/>
+                                            <ellipse cx="20" cy="9" rx="3.5" ry="7" fill="#38bdf8"/>
+                                            <ellipse cx="20" cy="31" rx="3.5" ry="7" fill="#38bdf8"/>
+                                            <ellipse cx="9" cy="20" rx="7" ry="3.5" fill="#38bdf8"/>
+                                            <ellipse cx="31" cy="20" rx="7" ry="3.5" fill="#38bdf8"/>
+                                        </g>
+                                    </svg>
+                                    <div id="aircon-output-status" class="text-xs md:text-sm font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">風量: 弱</div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- リアルタイム温度表示 -->
-                        <div class="bg-white p-3 rounded-lg flex items-center justify-around text-center border border-slate-300 shadow-sm">
-                            <div>
-                                <div class="text-[11px] text-slate-500 font-bold">センサー計測値</div>
-                                <div id="current-room-temp" class="text-2xl font-black text-slate-900 my-0.5">24.0 ℃</div>
-                            </div>
-                            <div>
-                                <div class="text-[11px] text-slate-500 font-bold">アクチュエータ（冷房）</div>
-                                <div id="aircon-output-status" class="text-xs font-bold text-blue-700 my-0.5 bg-blue-50 px-2.5 py-1 rounded border border-blue-200">風量: 弱</div>
+                        <!-- 右：Chart.js リアルタイム温度推移グラフ -->
+                        <div class="md:col-span-6 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="text-xs font-bold text-slate-600 text-center mb-1">📈 室温（青線）と目標温度（赤点線）のリアルタイム変化</div>
+                            <div class="h-44 relative">
+                                <canvas id="temp-live-chart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -421,195 +553,143 @@
             </div>
         </section>
 
-        <!-- ===== Slide 6: 【メリット・デメリット】 ===== -->
+        <!-- ===== Slide 6: 【メリット・デメリット】視覚図解 ===== -->
         <section id="slide-5" class="slide-container hidden">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
                 <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 06 / 12</span>
-                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-3 py-1 rounded-full font-bold">比較検討</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 06 / 11</span>
+                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">比較検討</span>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-scale-balanced text-blue-600"></i> 自動化・計測制御化の比較
+                    <i class="fa-solid fa-scale-balanced text-blue-600"></i> 自動化・計測制御の長所と注意点
                 </h2>
 
                 <div class="grid md:grid-cols-2 gap-6 my-2">
                     <!-- メリット -->
-                    <div class="bg-emerald-50/50 rounded-xl p-5 border-t-4 border-emerald-600 border-x border-b border-emerald-200 space-y-3">
-                        <div class="flex items-center space-x-2 text-emerald-900 font-bold text-lg">
-                            <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                            <span>メリット（長所）</span>
+                    <div class="bg-emerald-50/70 rounded-2xl p-5 border-2 border-emerald-400 space-y-3">
+                        <div class="flex items-center space-x-2 text-emerald-900 font-black text-xl">
+                            <i class="fa-solid fa-circle-check text-emerald-600 text-2xl"></i>
+                            <span>メリット（良いところ）</span>
                         </div>
-                        <ul class="space-y-3 text-xs md:text-sm text-slate-700">
-                            <li class="flex items-start gap-2">
-                                <span class="text-emerald-600 font-bold">✓</span>
-                                <div><strong>高い精度と安定性:</strong> 人間の不注意によるミスをなくし、24時間一定の品質を維持。</div>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-emerald-600 font-bold">✓</span>
-                                <div><strong>省エネルギー・効率化:</strong> 無駄な電力や燃料の消費を自動制御で最小限に。</div>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-emerald-600 font-bold">✓</span>
-                                <div><strong>危険な作業の代替:</strong> 高温・高所・災害現場など、人間が入るのが危険な場所で動作可能。</div>
-                            </li>
-                        </ul>
+                        <div class="space-y-3 text-sm md:text-base text-slate-800">
+                            <div class="bg-white p-3.5 rounded-xl border border-emerald-200 flex items-center gap-3">
+                                <span class="text-2xl">🎯</span>
+                                <div><strong>高い正確さと安定性:</strong> 人のうっかりミスをなくし、24時間同じ品質を保てます。</div>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-xl border border-emerald-200 flex items-center gap-3">
+                                <span class="text-2xl">🌱</span>
+                                <div><strong>省エネルギー・効率化:</strong> ムダな電気や燃料を使わないよう自動で調整できます。</div>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-xl border border-emerald-200 flex items-center gap-3">
+                                <span class="text-2xl">🦺</span>
+                                <div><strong>危険な作業の代わり:</strong> とても暑い場所や高い所、災害現場などでも安全に働けます。</div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- デメリット・リスク -->
-                    <div class="bg-rose-50/50 rounded-xl p-5 border-t-4 border-rose-600 border-x border-b border-rose-200 space-y-3">
-                        <div class="flex items-center space-x-2 text-rose-900 font-bold text-lg">
-                            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
-                            <span>デメリット・留意点（リスク）</span>
+                    <div class="bg-rose-50/70 rounded-2xl p-5 border-2 border-rose-400 space-y-3">
+                        <div class="flex items-center space-x-2 text-rose-900 font-black text-xl">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-2xl"></i>
+                            <span>デメリット（気をつける点）</span>
                         </div>
-                        <ul class="space-y-3 text-xs md:text-sm text-slate-700">
-                            <li class="flex items-start gap-2">
-                                <span class="text-rose-600 font-bold">✗</span>
-                                <div><strong>センサーの誤作動・汚れ:</strong> センサーが汚れて不正確な値を読み取ると重大事故の恐れ。</div>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-rose-600 font-bold">✗</span>
-                                <div><strong>停電・通信障害リスク:</strong> 電源やネットワークが絶たれるとシステム全体が停止。</div>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-rose-600 font-bold">✗</span>
-                                <div><strong>導入・維持コスト:</strong> 開発費用や専門技術者による定期メンテナンスが必要。</div>
-                            </li>
-                        </ul>
+                        <div class="space-y-3 text-sm md:text-base text-slate-800">
+                            <div class="bg-white p-3.5 rounded-xl border border-rose-200 flex items-center gap-3">
+                                <span class="text-2xl">📷</span>
+                                <div><strong>センサーの汚れ・故障:</strong> 泥やゴミがついて正しく測れないと、誤作動の原因になります。</div>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-xl border border-rose-200 flex items-center gap-3">
+                                <span class="text-2xl">⚡</span>
+                                <div><strong>停電・通信トラブル:</strong> 電気やネットが止まると、システム全体が動かなくなることがあります。</div>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-xl border border-rose-200 flex items-center gap-3">
+                                <span class="text-2xl">🔧</span>
+                                <div><strong>費用と点検の手間:</strong> 導入する費用や、専門家による定期的なメンテナンスが必要です。</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ===== Slide 7: 【歴史・背景】 ===== -->
+        <!-- ===== Slide 7: 【体験シミュレーション】自動運転ブレーキ制御 ===== -->
         <section id="slide-6" class="slide-container hidden">
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
-                <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 07 / 12</span>
-                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-3 py-1 rounded-full font-bold">歴史と歩み</span>
-                </div>
-                <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-timeline text-blue-600"></i> 制御技術はどう進化してきたか？
-                </h2>
-
-                <!-- タイムライン表示 -->
-                <div class="space-y-4 my-2 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-slate-200">
-                    <div class="relative pl-10">
-                        <div class="absolute left-2.5 top-2 w-3.5 h-3.5 bg-blue-600 rounded-full ring-4 ring-white"></div>
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <span class="text-xs font-bold text-blue-700">18世紀末 (産業革命)</span>
-                            <h3 class="font-bold text-slate-900 text-sm md:text-base">蒸気機関と遠心調速機（ガバナ）</h3>
-                            <p class="text-xs text-slate-600 mt-1">回転の力（遠心力）を利用して蒸気バルブを開閉する、世界初の機械式フィードバック制御が誕生。</p>
-                        </div>
-                    </div>
-
-                    <div class="relative pl-10">
-                        <div class="absolute left-2.5 top-2 w-3.5 h-3.5 bg-blue-600 rounded-full ring-4 ring-white"></div>
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <span class="text-xs font-bold text-blue-700">20世紀前半</span>
-                            <h3 class="font-bold text-slate-900 text-sm md:text-base">シーケンス制御の普及（電気リレー）</h3>
-                            <p class="text-xs text-slate-600 mt-1">あらかじめ決められた手順通りに「1➔2➔3」と自動処理する全自動洗濯機や工場機械が登場。</p>
-                        </div>
-                    </div>
-
-                    <div class="relative pl-10">
-                        <div class="absolute left-2.5 top-2 w-3.5 h-3.5 bg-blue-600 rounded-full ring-4 ring-white"></div>
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <span class="text-xs font-bold text-blue-700">20世紀後半</span>
-                            <h3 class="font-bold text-slate-900 text-sm md:text-base">マイコン（超小型コンピュータ）の組み込み</h3>
-                            <p class="text-xs text-slate-600 mt-1">電子回路の小型化・低価格化により、家庭用エアコンや炊飯器に高度なプログラム制御が組込。</p>
-                        </div>
-                    </div>
-
-                    <div class="relative pl-10">
-                        <div class="absolute left-2.5 top-2 w-3.5 h-3.5 bg-emerald-600 rounded-full ring-4 ring-white"></div>
-                        <div class="bg-emerald-50/70 p-4 rounded-xl border border-emerald-200 shadow-sm">
-                            <span class="text-xs font-bold text-emerald-800">現代 〜 未来</span>
-                            <h3 class="font-bold text-slate-900 text-sm md:text-base">AI × IoT による高度自律制御（自動運転）</h3>
-                            <p class="text-xs text-slate-600 mt-1">センサーの計測データとAI分析を組み合わせ、車やロボットが自ら判断して自律走行する時代へ。</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== Slide 8: 【体験シミュレーション】 (初見失敗 ➔ 調整成功 ➔ 次へ進む) ===== -->
-        <section id="slide-7" class="slide-container hidden">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-5">
                 <div class="border-b border-slate-200 pb-3 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 08 / 12</span>
-                    <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-3 py-1 rounded-full font-bold">体験テスト</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 07 / 11</span>
+                    <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">体験テスト</span>
                 </div>
                 
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <h2 class="text-xl md:text-2xl font-black text-slate-900 flex items-center gap-2">
+                    <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-car-side text-blue-600"></i> 自動運転ブレーキ制御テスト
                     </h2>
-                    <span class="text-xs text-rose-600 font-bold bg-rose-50 px-2.5 py-1 rounded border border-rose-200">
-                        ⚠️ 初期設定のままだと衝突事故が起こります！
+                    <span class="text-xs md:text-sm text-blue-800 font-bold bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200">
+                        💡 最初は衝突します！スライダーを調整して安全に止めよう！
                     </span>
                 </div>
 
                 <!-- Canvas ゲーム表示エリア -->
                 <div class="relative bg-slate-100 rounded-xl border-2 border-slate-300 overflow-hidden shadow-inner">
-                    <canvas id="sim-canvas" class="w-full h-48 md:h-52 block"></canvas>
+                    <canvas id="sim-canvas" class="w-full h-52 md:h-56 block"></canvas>
 
                     <!-- メッセージ表示 -->
-                    <div id="sim-message" class="absolute top-3 left-1/2 -translate-x-1/2 bg-white/95 border border-slate-300 shadow-md px-4 py-1.5 rounded-full text-xs md:text-sm font-bold text-center text-slate-900">
-                        「▶ 走行テスト開始」を押してみよう！（※最初は失敗します）
+                    <div id="sim-message" class="w-[92%] md:w-auto max-w-2xl absolute top-3 left-1/2 -translate-x-1/2 bg-white/95 border-2 border-slate-300 shadow-md px-4 py-2 rounded-xl text-sm md:text-base font-bold text-center text-slate-900">
+                        「▶ 走行テスト開始」を押してみよう！
                     </div>
                 </div>
 
                 <!-- パラメーターコントロールUI -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-300">
-                    <div>
-                        <div class="flex justify-between text-xs font-bold text-cyan-800 mb-1">
-                            <span>📡 センサー感知距離 (Sensor):</span>
-                            <span id="sim-range-val" class="font-bold text-cyan-700">30 m (短すぎる)</span>
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                        <div class="flex justify-between text-sm font-bold text-cyan-800 mb-2">
+                            <span>📡 センサー感知距離:</span>
+                            <span id="sim-range-val" class="font-black text-cyan-700">30 m (短い)</span>
                         </div>
-                        <!-- 初期値: 30m -->
-                        <input type="range" id="sim-range-slider" min="30" max="150" value="30" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600">
+                        <input type="range" id="sim-range-slider" min="30" max="150" value="30" class="w-full bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-slate-500 mt-1.5">何m手前で障害物に気づくか</p>
                     </div>
 
-                    <div>
-                        <div class="flex justify-between text-xs font-bold text-amber-800 mb-1">
-                            <span>🛑 ブレーキ強度 (Brake):</span>
-                            <span id="sim-brake-val" class="font-bold text-amber-700">30 % (弱すぎる)</span>
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                        <div class="flex justify-between text-sm font-bold text-amber-800 mb-2">
+                            <span>🛑 ブレーキの強さ:</span>
+                            <span id="sim-brake-val" class="font-black text-amber-700">30 % (弱い)</span>
                         </div>
-                        <!-- 初期値: 30% -->
-                        <input type="range" id="sim-brake-slider" min="10" max="100" step="5" value="30" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600">
+                        <input type="range" id="sim-brake-slider" min="10" max="100" step="5" value="30" class="w-full bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-slate-500 mt-1.5">ブレーキをかける力の大きさ</p>
                     </div>
 
-                    <div>
-                        <div class="flex justify-between text-xs font-bold text-emerald-800 mb-1">
-                            <span>🚀 走行車速 (Speed):</span>
-                            <span id="sim-speed-val" class="font-bold text-emerald-700">60 km/h</span>
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+                        <div class="flex justify-between text-sm font-bold text-emerald-800 mb-2">
+                            <span>🚀 車のスピード:</span>
+                            <span id="sim-speed-val" class="font-black text-emerald-700">60 km/h</span>
                         </div>
-                        <!-- 初期値: 60km/h -->
-                        <input type="range" id="sim-speed-slider" min="30" max="100" step="5" value="60" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                        <input type="range" id="sim-speed-slider" min="30" max="100" step="5" value="60" class="w-full bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                        <p class="text-xs text-slate-500 mt-1.5">速いほど止まるまでに距離が必要</p>
                     </div>
                 </div>
 
                 <!-- 実行ボタン ＆ 成功時アピールバナー -->
                 <div class="space-y-3 pt-1">
-                    <div class="flex space-x-3">
-                        <button id="sim-start-btn" onclick="startSimulation()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm md:text-base">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button id="sim-start-btn" onclick="startSimulation()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-4 rounded-xl transition shadow-md flex items-center justify-center gap-2 text-base md:text-lg">
                             <i class="fa-solid fa-play"></i> 走行テスト開始
                         </button>
-                        <button id="sim-reset-btn" onclick="resetSimulation()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-3 rounded-xl transition border border-slate-300 text-sm">
+                        <button id="sim-reset-btn" onclick="resetSimulation()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-6 py-4 rounded-xl transition border-2 border-slate-300 text-base">
                             初期状態に戻す
                         </button>
                     </div>
 
                     <!-- 成功時メッセージ案内 -->
                     <div id="sim-success-banner" class="hidden transition-all duration-500">
-                        <div class="bg-emerald-50 border-2 border-emerald-400 p-4 rounded-xl text-emerald-950 shadow-md flex items-center justify-between gap-3">
+                        <div class="bg-emerald-50 border-2 border-emerald-400 p-4 rounded-xl text-emerald-950 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
                             <div class="flex items-center space-x-3">
-                                <i class="fa-solid fa-circle-check text-emerald-600 text-2xl"></i>
-                                <p class="text-xs md:text-sm font-bold">
-                                    素晴らしい！パラメーターの調整に成功しました！右下の「次へ ›」を押して、社会での使われ方・クイズへ進もう！
+                                <i class="fa-solid fa-circle-check text-emerald-600 text-3xl shrink-0"></i>
+                                <p class="text-sm md:text-base font-bold">
+                                    大成功！数値を工夫して安全に停止できましたね！右下の「次へ ›」を押して進もう！
                                 </p>
                             </div>
-                            <button onclick="nextSlide()" class="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow">
+                            <button onclick="nextSlide()" class="w-full sm:w-auto shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-sm md:text-base font-bold px-5 py-3 rounded-xl transition shadow">
                                 次へ進む ›
                             </button>
                         </div>
@@ -618,110 +698,111 @@
             </div>
         </section>
 
-        <!-- ===== Slide 9: 【社会での使われ方】 ===== -->
-        <section id="slide-8" class="slide-container hidden">
+        <!-- ===== Slide 8: 【社会での使われ方】イラスト図解カード ===== -->
+        <section id="slide-7" class="slide-container hidden">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
                 <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 09 / 12</span>
-                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-3 py-1 rounded-full font-bold">社会・産業の活用</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 08 / 11</span>
+                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">社会・産業の活用</span>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-building-user text-blue-600"></i> 社会や仕事の現場で活躍する計測制御
                 </h2>
 
                 <div class="grid sm:grid-cols-2 gap-4 my-2">
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2 card-interactive">
-                        <div class="flex items-center space-x-2 text-emerald-700 font-bold text-base">
-                            <i class="fa-solid fa-wheat-awn text-xl"></i>
-                            <span>スマート農業（施設園芸）</span>
+                    <div class="bg-emerald-50/50 p-5 rounded-2xl border-2 border-emerald-200 flex items-start gap-4 card-interactive">
+                        <div class="bg-emerald-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-sm">
+                            <i class="fa-solid fa-wheat-awn"></i>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed">ビニールハウス内の土壌水分・日照・CO2濃度をセンサー計測し、自動で液肥給水や天窓開閉を行って高品質で作物を栽培します。</p>
+                        <div class="space-y-1">
+                            <h3 class="text-emerald-900 font-black text-lg">スマート農業（ハウス栽培）</h3>
+                            <p class="text-sm md:text-base text-slate-700 leading-relaxed">土の水分や日光・温度をセンサーで測り、自動で水やりや窓の開け閉めを行っておいしい野菜を育てます。</p>
+                        </div>
                     </div>
 
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2 card-interactive">
-                        <div class="flex items-center space-x-2 text-blue-700 font-bold text-base">
-                            <i class="fa-solid fa-industry text-xl"></i>
-                            <span>スマートファクトリー（工場自動化）</span>
+                    <div class="bg-blue-50/50 p-5 rounded-2xl border-2 border-blue-200 flex items-start gap-4 card-interactive">
+                        <div class="bg-blue-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-sm">
+                            <i class="fa-solid fa-industry"></i>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed">産業用ロボットがカメラ画像センサーで製品のキズや位置をミリ単位で検知し、組み立てや検査を完全自動で行います。</p>
+                        <div class="space-y-1">
+                            <h3 class="text-blue-900 font-black text-lg">スマートファクトリー（工場）</h3>
+                            <p class="text-sm md:text-base text-slate-700 leading-relaxed">ロボットがカメラ（画像センサー）で部品の位置やキズをミリ単位で見つけ、組み立てや検査を行います。</p>
+                        </div>
                     </div>
 
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2 card-interactive">
-                        <div class="flex items-center space-x-2 text-rose-700 font-bold text-base">
-                            <i class="fa-solid fa-heart-pulse text-xl"></i>
-                            <span>医療・介護ロボット</span>
+                    <div class="bg-rose-50/50 p-5 rounded-2xl border-2 border-rose-200 flex items-start gap-4 card-interactive">
+                        <div class="bg-rose-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-sm">
+                            <i class="fa-solid fa-heart-pulse"></i>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed">心拍・体温・血圧を24時間センサー監視し、異常時に自動通報するモニター装置や精密な手術支援ロボットに応用。</p>
+                        <div class="space-y-1">
+                            <h3 class="text-rose-900 font-black text-lg">医療・介護ロボット</h3>
+                            <p class="text-sm md:text-base text-slate-700 leading-relaxed">心拍数や体温を24時間センサーで見守り、異常があれば知らせる装置や、歩行を助けるロボットに使われます。</p>
+                        </div>
                     </div>
 
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2 card-interactive">
-                        <div class="flex items-center space-x-2 text-amber-700 font-bold text-base">
-                            <i class="fa-solid fa-shield-halved text-xl"></i>
-                            <span>防災・河川監視システム</span>
+                    <div class="bg-amber-50/50 p-5 rounded-2xl border-2 border-amber-200 flex items-start gap-4 card-interactive">
+                        <div class="bg-amber-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-sm">
+                            <i class="fa-solid fa-shield-halved"></i>
                         </div>
-                        <p class="text-xs text-slate-600 leading-relaxed">雨量計や水位センサーで河川の溢水をリアルタイム監視し、警戒レベルに達すると水門を自動閉鎖したり避難指示を自動発信します。</p>
+                        <div class="space-y-1">
+                            <h3 class="text-amber-900 font-black text-lg">防災・河川監視システム</h3>
+                            <p class="text-sm md:text-base text-slate-700 leading-relaxed">雨の量や川の水の高さを監視し、危険になると水門を自動で閉めたり避難のお知らせを出したりします。</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ===== Slide 10: 【理解度チェック】 ===== -->
-        <section id="slide-9" class="slide-container hidden">
+        <!-- ===== Slide 9: 【理解度チェック】 ===== -->
+        <section id="slide-8" class="slide-container hidden">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
                 <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 10 / 12</span>
-                    <span class="bg-amber-50 text-amber-800 border border-amber-200 text-xs px-3 py-1 rounded-full font-bold">確認クイズ</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 09 / 11</span>
+                    <span class="bg-amber-50 text-amber-800 border border-amber-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">確認クイズ</span>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-clipboard-question text-blue-600"></i> 理解度チェッククイズ（全4問）
                 </h2>
 
                 <!-- クイズ進行表示 -->
-                <div id="quiz-box" class="space-y-6">
-                    <div class="flex justify-between items-center text-xs text-slate-500 border-b border-slate-200 pb-2">
+                <div id="quiz-box" class="space-y-5">
+                    <div class="flex justify-between items-center text-sm text-slate-600 border-b border-slate-200 pb-2">
                         <span id="quiz-progress-text" class="font-bold">問題 1 / 4</span>
                         <span id="quiz-score-live" class="font-bold text-blue-600">現在のスコア: 0 点</span>
                     </div>
 
-                    <!-- 質問テキスト -->
-                    <h3 id="quiz-question" class="text-lg md:text-xl font-bold text-slate-900 leading-snug">
+                    <h3 id="quiz-question" class="text-lg md:text-2xl font-bold text-slate-900 leading-snug">
                         質問を読み込み中...
                     </h3>
 
-                    <!-- 選択肢リスト -->
-                    <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <!-- JSで動的にボタン生成 -->
-                    </div>
+                    <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
 
-                    <!-- 回答解説フィードバック -->
-                    <div id="quiz-explanation" class="hidden p-4 rounded-xl border text-sm font-medium"></div>
+                    <div id="quiz-explanation" class="hidden p-4 rounded-xl border-2 text-base font-medium"></div>
 
-                    <!-- 次へ進むボタン -->
                     <div class="text-right">
-                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow transition">
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-xl shadow text-base transition">
                             次の問題へ ➔
                         </button>
                     </div>
                 </div>
 
-                <!-- クイズ結果画面 (初期状態は非表示) -->
+                <!-- クイズ結果画面 -->
                 <div id="quiz-result-box" class="hidden space-y-6 text-center">
                     <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                        <h3 class="text-2xl font-bold text-slate-900">🎉 クイズ終了！結果発表</h3>
-                        <p id="quiz-final-score" class="text-3xl font-black text-blue-600">4 問中 4 問 正解！ (100点)</p>
+                        <h3 class="text-2xl md:text-3xl font-bold text-slate-900">🎉 クイズ終了！結果発表</h3>
+                        <p id="quiz-final-score" class="text-3xl md:text-4xl font-black text-blue-600">4 問中 4 問 正解！ (100点)</p>
                         
-                        <!-- Chart.js グラフ描画キャンバス -->
                         <div class="max-w-xs mx-auto h-48 relative">
                             <canvas id="quiz-chart"></canvas>
                         </div>
 
-                        <p id="quiz-feedback-msg" class="text-sm font-bold text-slate-700">素晴らしい！計測制御の基本要素をしっかり理解できています！</p>
+                        <p id="quiz-feedback-msg" class="text-base md:text-lg font-bold text-slate-800">素晴らしい！計測制御の基本をしっかり理解できていますね！</p>
                         
-                        <div class="pt-2 flex justify-center gap-3">
-                            <button onclick="restartQuiz()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-5 py-2.5 rounded-lg text-sm transition border border-slate-300">
+                        <div class="pt-2 flex flex-wrap justify-center gap-3">
+                            <button onclick="restartQuiz()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-6 py-3 rounded-xl text-base transition border border-slate-300">
                                 もう一度挑戦する
                             </button>
-                            <button onclick="nextSlide()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow">
+                            <button onclick="nextSlide()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-7 py-3 rounded-xl text-base transition shadow">
                                 今日のまとめへ進む ›
                             </button>
                         </div>
@@ -730,151 +811,129 @@
             </div>
         </section>
 
-        <!-- ===== Slide 11: 【今日のポイント＆今後の展望】 ===== -->
-        <section id="slide-10" class="slide-container hidden">
+        <!-- ===== Slide 10: 【今日のポイント】ビジュアル図解まとめ ===== -->
+        <section id="slide-9" class="slide-container hidden">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6">
                 <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 11 / 12</span>
-                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-3 py-1 rounded-full font-bold">まとめ・未来</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 10 / 11</span>
+                    <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">まとめ・未来</span>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-black text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-flag-checkered text-blue-600"></i> 本日の要点まとめ ＆ 未来への展望
+                    <i class="fa-solid fa-flag-checkered text-blue-600"></i> 今日の要点まとめ ＆ 未来への課題
                 </h2>
 
                 <div class="grid md:grid-cols-3 gap-4 my-2">
-                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-1.5 relative card-interactive">
-                        <span class="text-xs font-bold text-blue-600 block">POINT 1</span>
-                        <h3 class="font-bold text-slate-900 text-sm">計測と制御の3大要素</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            センサー（計測）➔ 制御部（判断）➔ アクチュエータ（動作）の3段階で動く仕組み。
+                    <div class="bg-blue-50/50 border-2 border-blue-200 p-5 rounded-2xl space-y-2 text-center card-interactive">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-black">1</div>
+                        <h3 class="font-black text-slate-900 text-lg">計測と制御の3大要素</h3>
+                        <p class="text-sm md:text-base text-slate-700 leading-relaxed">
+                            📡センサー（計測）➔ 🧠制御部（判断）➔ 🦾アクチュエータ（動作）の3つが連携して動いています。
                         </p>
                     </div>
 
-                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-1.5 relative card-interactive">
-                        <span class="text-xs font-bold text-blue-600 block">POINT 2</span>
-                        <h3 class="font-bold text-slate-900 text-sm">フィードバック制御</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            センサーの計測値を常に見張り、目標値との誤差をなくすように自動で微調整するループ。
+                    <div class="bg-emerald-50/50 border-2 border-emerald-200 p-5 rounded-2xl space-y-2 text-center card-interactive">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl font-black">2</div>
+                        <h3 class="font-black text-slate-900 text-lg">フィードバック制御</h3>
+                        <p class="text-sm md:text-base text-slate-700 leading-relaxed">
+                            🔄 センサーの値を常に見張り、目標とのズレをなくすように自動で微調整を続けるしくみです。
                         </p>
                     </div>
 
-                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-1.5 relative card-interactive">
-                        <span class="text-xs font-bold text-blue-600 block">POINT 3</span>
-                        <h3 class="font-bold text-slate-900 text-sm">プログラムの最適化と安全性</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            センサー感度や安全マージンなど、適切な制御ルールを設定して事故やエラーを防ぐ重要性。
+                    <div class="bg-amber-50/50 border-2 border-amber-200 p-5 rounded-2xl space-y-2 text-center card-interactive">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-amber-500 text-white flex items-center justify-center text-xl font-black">3</div>
+                        <h3 class="font-black text-slate-900 text-lg">条件設定と安全性</h3>
+                        <p class="text-sm md:text-base text-slate-700 leading-relaxed">
+                            📏 「何mでブレーキをかけるか」といった<ruby>閾値<rt>しきいち</rt></ruby>（境界の数値）を正しく設定することが安全につながります。
                         </p>
                     </div>
                 </div>
 
-                <div class="bg-slate-100 p-4 rounded-xl border border-slate-300 space-y-2">
-                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-shield-cat text-blue-600"></i> 未来の課題：サイバーセキュリティと倫理
-                    </h3>
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                        すべての機械がインターネットに接続される（IoT）時代では、ハッキングによる誤動作を防ぐセキュリティ技術や、事故時にAIがどのような判断を下すべきかという倫理的議論も大切なテーマです。
-                    </p>
+                <div class="bg-slate-100 p-5 rounded-2xl border border-slate-300 flex items-start gap-4">
+                    <div class="text-3xl text-blue-600 mt-1"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="space-y-1">
+                        <h3 class="font-bold text-slate-900 text-base md:text-lg">未来の課題：安全を守る工夫（フェイルセーフ）</h3>
+                        <p class="text-sm md:text-base text-slate-700 leading-relaxed">
+                            もしセンサーが壊れたり、通信が途切れたりしても、機械が暴走せず<strong>「安全な方向へ止まる設計（フェイルセーフ）」</strong>や、ハッキングを防ぐセキュリティの知識がこれからの技術には求められています。
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- ===== Slide 12: 【発展学習・アルゴロジックへ】 (最後のお楽しみ) ===== -->
-        <section id="slide-11" class="slide-container hidden">
+        <!-- ===== Slide 11: 【発展学習・アルゴロジックへ】 ===== -->
+        <section id="slide-10" class="slide-container hidden">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-md space-y-6 text-center">
                 <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm">SLIDE 12 / 12</span>
-                    <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-3 py-1 rounded-full font-bold">発展学習・実習</span>
+                    <span class="text-blue-600 font-bold tracking-wider text-sm md:text-base">SLIDE 11 / 11</span>
+                    <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs md:text-sm px-3 py-1 rounded-full font-bold">発展学習・実習</span>
                 </div>
 
                 <div class="space-y-3 py-2">
-                    <span class="bg-yellow-400 text-yellow-950 font-black text-xs px-3 py-1 rounded-full inline-block">✨ 理解度チェック ＆ まとめ完了！</span>
+                    <span class="bg-yellow-400 text-yellow-950 font-black text-xs md:text-sm px-4 py-1 rounded-full inline-block">✨ 理解度チェック ＆ まとめ完了！</span>
                     <h2 class="text-2xl md:text-3xl font-black text-slate-900">
-                        プログラミングで自動運転に挑戦してみよう！
+                        プログラミングでロボットを動かしてみよう！
                     </h2>
-                    <p class="text-slate-600 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-                        本日の講義とクイズはお疲れ様でした！最後の仕上げとして、JEITAが提供するプログラミング学習サイト『アルゴロジック』で、実際に命令ブロックを組み合わせて車をゴールへ動かすパズルに挑戦してみよう！
+                    <p class="text-slate-700 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+                        ここまでの学習お疲れさまでした！最後の仕上げとして、プログラミング学習サイト『アルゴロジック』で、命令ブロックを組み合わせてゴールを目指すパズルに挑戦しよう！
                     </p>
                 </div>
 
-                <!-- 大型アルゴロジック誘導バナー -->
                 <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 p-6 md:p-8 rounded-2xl text-white shadow-xl border-2 border-blue-300 max-w-2xl mx-auto space-y-4 pulse-highlight">
                     <div class="text-4xl"><i class="fa-solid fa-laptop-code"></i></div>
                     <h3 class="text-xl md:text-2xl font-black tracking-tight">JEITA アルゴロジック (Algo-Logic)</h3>
-                    <p class="text-xs md:text-sm text-blue-100 leading-relaxed">
-                        「前進」「右折」「センサー判断」などのアルゴリズムを組み立てて、自動運転車を安全に走らせる基本プログラムを楽しく学べます。
+                    <p class="text-sm md:text-base text-blue-100 leading-relaxed">
+                        「前進」「右折」「くり返し」「条件分岐」などのプログラムを組み立てて、論理的に考える力を楽しく鍛えられます。
                     </p>
                     <div class="pt-2">
                         <a href="https://algo.jeita.or.jp/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-3 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black px-8 py-4 rounded-xl shadow-lg transition transform hover:scale-105 text-base md:text-lg">
-                            <span>アルゴロジックを開いて学習を開始する</span>
+                            <span>アルゴロジックを開いて挑戦する</span>
                             <i class="fa-solid fa-arrow-up-right-from-square"></i>
                         </a>
                     </div>
                 </div>
 
-                <p class="text-xs text-slate-500 font-medium">
-                    ※ クリックすると新しいタブで JEITA『アルゴロジック』(https://algo.jeita.or.jp/) が開きます。
+                <p class="text-xs md:text-sm text-slate-500 font-medium">
+                    ※ ボタンを押すと新しいタブで『アルゴロジック』が開きます。
                 </p>
             </div>
         </section>
 
     </main>
 
-    <!-- ==================== 固定フッター (スライド操作ナビ) ==================== -->
-    <footer class="bg-white/95 backdrop-blur border-t border-slate-200 px-4 py-3 sticky bottom-0 z-40 shadow-sm">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <!-- ==================== 固定フッター (左下に「前へ」、右下に大きく「次へ」) ==================== -->
+    <footer class="bg-white/95 backdrop-blur border-t-2 border-slate-200 px-4 py-3 sticky bottom-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
             
-            <!-- 前へ・次へボタン -->
-            <div class="flex items-center space-x-2">
-                <button id="prev-btn" onclick="prevSlide()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2 rounded-lg text-sm border border-slate-300 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1">
-                    ‹ 前へ
-                </button>
-                <button id="next-btn" onclick="nextSlide()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg text-sm transition shadow flex items-center gap-1">
-                    次へ ›
-                </button>
-            </div>
+            <!-- 左下：前へボタン -->
+            <button id="prev-btn" onclick="prevSlide()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-5 py-3.5 rounded-xl text-base border-2 border-slate-300 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 shrink-0">
+                <i class="fa-solid fa-chevron-left"></i> <span>前へ</span>
+            </button>
 
-            <!-- プログレスバー & ページ数 -->
-            <div class="flex-1 max-w-xs mx-4 hidden sm:block">
-                <div class="flex justify-between text-xs text-slate-500 font-bold mb-1">
-                    <span>学習進捗</span>
-                    <span id="slide-num-indicator">1 / 12</span>
+            <!-- 中央：プログレスバー & ページ数 -->
+            <div class="flex-1 max-w-md mx-2">
+                <div class="flex justify-between text-xs md:text-sm text-slate-600 font-bold mb-1">
+                    <span>学習の進み具合</span>
+                    <span id="slide-num-indicator">1 / 11</span>
                 </div>
-                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 8%;"></div>
+                <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 9%;"></div>
                 </div>
             </div>
 
-            <!-- キーボード案内 -->
-            <div class="text-xs text-slate-500 hidden lg:block font-medium">
-                キーボードの <kbd class="px-1.5 py-0.5 bg-slate-200 rounded text-slate-800 border border-slate-300">←</kbd> <kbd class="px-1.5 py-0.5 bg-slate-200 rounded text-slate-800 border border-slate-300">→</kbd> キーでも切り替え可能です
-            </div>
+            <!-- 右下：大きく押しやすい「次へ」ボタン -->
+            <button id="next-btn" onclick="nextSlide()" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black px-8 md:px-10 py-3.5 rounded-xl text-base md:text-lg transition shadow-lg flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
+                <span>次へ</span> <i class="fa-solid fa-chevron-right"></i>
+            </button>
         </div>
     </footer>
 
-    <!-- ==================== 右下固定 著作権表示 (規定事項) ==================== -->
-    <div class="fixed bottom-3 right-4 z-50 pointer-events-none">
-        <span class="bg-white/90 text-slate-700 text-[11px] font-mono font-bold px-2.5 py-1 rounded-md border border-slate-300 shadow-sm">
-            ©2026 t-suzuki
-        </span>
-    </div>
-
     <!-- ==================== JavaScript メインロジック ==================== -->
     <script>
-        /*
-         * 計測制御の技術 - 教材JavaScriptアプリ
-         * 作成者: t-suzuki (2026)
-         * 保存用ファイル名: keisokuseigyo
-         * 
-         * 【教員用カスタマイズメモ】
-         * - QUIZ_DATA 配列の質問・選択肢・解説を編集することで、授業の進度に合わせた問題の入れ替えが可能です。
-         */
-
-        // ---------- 1. スライド切り替えロジック ----------
+        // ---------- 1. スライド切り替えロジック (全11スライド) ----------
         let currentSlide = 0;
-        const totalSlides = 12; // 全12スライド
+        const totalSlides = 11;
 
         function updateSlideUI() {
-            // 全スライドを一旦非表示
             for (let i = 0; i < totalSlides; i++) {
                 const slide = document.getElementById(`slide-${i}`);
                 if (slide) {
@@ -883,27 +942,27 @@
                 }
             }
 
-            // アクティブスライドを表示
             const activeSlide = document.getElementById(`slide-${currentSlide}`);
             if (activeSlide) {
                 activeSlide.classList.remove('hidden');
                 setTimeout(() => activeSlide.classList.add('slide-active'), 10);
             }
 
-            // 目次ドロップダウン同期
             document.getElementById('slide-select').value = currentSlide;
-
-            // プログレスバー・ページ番号更新
             document.getElementById('slide-num-indicator').innerText = `${currentSlide + 1} / ${totalSlides}`;
             const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
             document.getElementById('progress-bar').style.width = `${progressPercent}%`;
 
-            // ボタン活性・不活性
             document.getElementById('prev-btn').disabled = (currentSlide === 0);
             document.getElementById('next-btn').disabled = (currentSlide === totalSlides - 1);
 
-            // スライド8 (自動運転シミュレーター) 表示時にCanvas再描画
-            if (currentSlide === 7) {
+            if (currentSlide === 1 && !whyLearnChartInstance) {
+                initWhyLearnChart();
+            }
+            if (currentSlide === 4 && !tempLiveChartInstance) {
+                initTempLiveChart();
+            }
+            if (currentSlide === 6) {
                 setTimeout(resizeCanvas, 50);
             }
         }
@@ -924,33 +983,63 @@
             }
         }
 
-        // キーボード矢印キー操作
         document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
             if (e.key === 'ArrowRight') nextSlide();
             if (e.key === 'ArrowLeft') prevSlide();
         });
 
-        // ドロップダウン選択連動
         document.getElementById('slide-select').addEventListener('change', (e) => {
             currentSlide = parseInt(e.target.value, 10);
             updateSlideUI();
         });
 
-        // フルスクリーン切替
         document.getElementById('fullscreen-btn').addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`全画面表示エラー: ${err.message}`);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
             }
         });
 
 
-        // ---------- 2. スライド4 (身近な例): カードタップ開閉 ----------
+        // ---------- 2. Slide 2: 追突事故比較グラフ ----------
+        let whyLearnChartInstance = null;
+        function initWhyLearnChart() {
+            const ctxWhy = document.getElementById('why-learn-chart');
+            if (!ctxWhy) return;
+            whyLearnChartInstance = new Chart(ctxWhy.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['自動ブレーキなし', '自動ブレーキ搭載車'],
+                    datasets: [{
+                        label: '追突事故の発生割合（指数）',
+                        data: [100, 38],
+                        backgroundColor: ['#94a3b8', '#2563eb'],
+                        borderRadius: 10,
+                        barThickness: 54
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 120,
+                            ticks: { font: { family: 'Noto Sans JP', weight: 'bold' } }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Noto Sans JP', weight: 'bold', size: 13 } }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // ---------- 3. Slide 4: 家電カードタップ開閉 ----------
         function toggleExampleCard(cardElement) {
             const details = cardElement.querySelector('.example-details');
             if (details) {
@@ -959,15 +1048,65 @@
         }
 
 
-        // ---------- 3. スライド5 (室温フィードバックシミュレーター) ----------
+        // ---------- 4. Slide 5: 室温フィードバック ＋ リアルタイム折れ線グラフ ----------
         const envSlider = document.getElementById('env-temp-slider');
         const targetSlider = document.getElementById('target-temp-slider');
         const envVal = document.getElementById('env-temp-val');
         const targetVal = document.getElementById('target-temp-val');
         const currentRoomTempEl = document.getElementById('current-room-temp');
         const airconOutputEl = document.getElementById('aircon-output-status');
+        const tempBadgeEl = document.getElementById('temp-status-badge');
+        const fanBladesEl = document.getElementById('fan-blades');
 
         let roomTemp = 24.0;
+        let tempLiveChartInstance = null;
+        const tempHistory = Array(20).fill(24.0);
+        const targetHistory = Array(20).fill(24.0);
+        const timeLabels = Array(20).fill('');
+
+        function initTempLiveChart() {
+            const ctxTemp = document.getElementById('temp-live-chart');
+            if (!ctxTemp) return;
+            tempLiveChartInstance = new Chart(ctxTemp.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: timeLabels,
+                    datasets: [
+                        {
+                            label: '今の室温 (℃)',
+                            data: tempHistory,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: '目標温度 (℃)',
+                            data: targetHistory,
+                            borderColor: '#ef4444',
+                            borderWidth: 2,
+                            borderDash: [6, 4],
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    scales: {
+                        y: { min: 15, max: 38, ticks: { font: { size: 11, weight: 'bold' } } },
+                        x: { display: false }
+                    },
+                    plugins: {
+                        legend: { labels: { font: { family: 'Noto Sans JP', size: 11, weight: 'bold' } } }
+                    }
+                }
+            });
+        }
 
         function updateRoomSimulation() {
             if (!envSlider || !targetSlider) return;
@@ -977,42 +1116,50 @@
             envVal.innerText = `${env} ℃`;
             targetVal.innerText = `${target} ℃`;
 
-            // フィードバック制御計算
             const diff = target - roomTemp;
             if (Math.abs(diff) > 0.1) {
-                roomTemp += diff * 0.15;
+                roomTemp += diff * 0.16;
             } else {
                 roomTemp = target;
             }
-
-            // 外気温の影響
-            roomTemp += (env - roomTemp) * 0.02;
+            roomTemp += (env - roomTemp) * 0.025;
 
             currentRoomTempEl.innerText = `${roomTemp.toFixed(1)} ℃`;
 
-            // エアコン状態更新
-            if (roomTemp > target + 1.5) {
-                airconOutputEl.innerText = '風量: 強（冷房中）';
-                airconOutputEl.className = 'text-xs font-bold text-cyan-800 my-0.5 bg-cyan-100 px-2.5 py-1 rounded border border-cyan-300';
-            } else if (roomTemp < target - 1.5) {
-                airconOutputEl.innerText = '風量: 強（暖房中）';
-                airconOutputEl.className = 'text-xs font-bold text-rose-800 my-0.5 bg-rose-100 px-2.5 py-1 rounded border border-rose-300';
+            if (roomTemp > target + 1.2) {
+                airconOutputEl.innerText = '風量: 強（冷房）';
+                airconOutputEl.className = 'text-xs md:text-sm font-bold text-cyan-800 bg-cyan-100 px-2.5 py-1 rounded-lg border border-cyan-300';
+                tempBadgeEl.innerText = '目標より暑い → しっかり冷やし中';
+                tempBadgeEl.className = 'text-xs md:text-sm px-3 py-1 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300';
+                if (fanBladesEl) fanBladesEl.setAttribute('class', 'fan-fast');
+            } else if (roomTemp < target - 1.2) {
+                airconOutputEl.innerText = '風量: 強（暖房）';
+                airconOutputEl.className = 'text-xs md:text-sm font-bold text-rose-800 bg-rose-100 px-2.5 py-1 rounded-lg border border-rose-300';
+                tempBadgeEl.innerText = '目標より寒い → しっかり暖め中';
+                tempBadgeEl.className = 'text-xs md:text-sm px-3 py-1 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300';
+                if (fanBladesEl) fanBladesEl.setAttribute('class', 'fan-fast');
             } else {
                 airconOutputEl.innerText = '風量: 弱（維持）';
-                airconOutputEl.className = 'text-xs font-bold text-emerald-800 my-0.5 bg-emerald-100 px-2.5 py-1 rounded border border-emerald-300';
+                airconOutputEl.className = 'text-xs md:text-sm font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-300';
+                tempBadgeEl.innerText = 'ちょうどよい温度で安定中';
+                tempBadgeEl.className = 'text-xs md:text-sm px-3 py-1 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+                if (fanBladesEl) fanBladesEl.setAttribute('class', 'fan-slow');
+            }
+
+            // グラフ配列更新
+            tempHistory.push(Number(roomTemp.toFixed(2)));
+            tempHistory.shift();
+            targetHistory.push(target);
+            targetHistory.shift();
+            if (tempLiveChartInstance) {
+                tempLiveChartInstance.update();
             }
         }
 
-        setInterval(updateRoomSimulation, 200);
+        setInterval(updateRoomSimulation, 350);
 
 
-        // ---------- 4. スライド8 (自動運転ブレーキ制御シミュレーター) ----------
-        /*
-         * 【試行錯誤ロジック】
-         * 初期値: センサー30m, ブレーキ30%, 車速60km/h ➔ 初回は必ず「💥 衝突事故」が発生。
-         * 生徒が「センサー70m以上」「ブレーキ70%以上」などに調整して成功させます。
-         */
-
+        // ---------- 5. Slide 7: 自動運転ブレーキ制御シミュレーター ----------
         const canvas = document.getElementById('sim-canvas');
         const ctx = canvas ? canvas.getContext('2d') : null;
 
@@ -1029,7 +1176,6 @@
         }
         window.addEventListener('resize', resizeCanvas);
 
-        // スライダー操作時にリセットと状態反映を行なって操作感を快適化
         function handleSliderInput() {
             if (simRunning) {
                 simRunning = false;
@@ -1037,19 +1183,18 @@
             }
             carX = 50;
             const msgEl = document.getElementById('sim-message');
-            msgEl.innerText = "パラメーターを変更しました。「▶ 走行テスト開始」を押してください";
-            msgEl.className = "absolute top-3 left-1/2 -translate-x-1/2 bg-white/95 border border-slate-300 shadow-md px-4 py-1.5 rounded-full text-xs md:text-sm font-bold text-center text-slate-900 block";
+            msgEl.innerText = "数値を変更しました！「▶ 走行テスト開始」を押して試してみよう！";
+            msgEl.className = "w-[92%] md:w-auto max-w-2xl absolute top-3 left-1/2 -translate-x-1/2 bg-white/95 border-2 border-slate-300 shadow-md px-4 py-2 rounded-xl text-sm md:text-base font-bold text-center text-slate-900 block";
             document.getElementById('sim-success-banner').classList.add('hidden');
             drawSimulationFrame();
         }
 
-        // スライダーリスナー設定
         document.getElementById('sim-range-slider').addEventListener('input', (e) => {
-            document.getElementById('sim-range-val').innerText = `${e.target.value} m ${e.target.value < 60 ? '(短すぎる)' : ''}`;
+            document.getElementById('sim-range-val').innerText = `${e.target.value} m ${e.target.value < 60 ? '(短い)' : ''}`;
             handleSliderInput();
         });
         document.getElementById('sim-brake-slider').addEventListener('input', (e) => {
-            document.getElementById('sim-brake-val').innerText = `${e.target.value} % ${e.target.value < 60 ? '(弱すぎる)' : ''}`;
+            document.getElementById('sim-brake-val').innerText = `${e.target.value} % ${e.target.value < 60 ? '(弱い)' : ''}`;
             handleSliderInput();
         });
         document.getElementById('sim-speed-slider').addEventListener('input', (e) => {
@@ -1063,11 +1208,10 @@
             carX = 50;
             
             const msgEl = document.getElementById('sim-message');
-            msgEl.innerText = "「▶ 走行テスト開始」を押してみよう！（※最初は失敗します）";
-            msgEl.className = "absolute top-3 left-1/2 -translate-x-1/2 bg-white/95 border border-slate-300 shadow-md px-4 py-1.5 rounded-full text-xs md:text-sm font-bold text-center text-slate-900 block";
+            msgEl.innerText = "「▶ 走行テスト開始」を押してみよう！";
+            msgEl.className = "w-[92%] md:w-auto max-w-2xl absolute top-3 left-1/2 -translate-x-1/2 bg-white/95 border-2 border-slate-300 shadow-md px-4 py-2 rounded-xl text-sm md:text-base font-bold text-center text-slate-900 block";
             
             document.getElementById('sim-success-banner').classList.add('hidden');
-
             drawSimulationFrame();
         }
 
@@ -1092,67 +1236,67 @@
             const brakeDecelPx = sliderBrake * 0.005;
 
             const targetObstacleX = canvas.width - 100;
-            const carWidth = 60;
+            const carWidth = 64;
             const distToObstacle = targetObstacleX - (carX + carWidth);
 
             const msgEl = document.getElementById('sim-message');
+            let isBraking = false;
 
-            // 1. センサー検知範囲に入ったか？
             if (distToObstacle <= sensorRangePx && distToObstacle > 0) {
+                isBraking = true;
                 carSpeedCurrent -= brakeDecelPx;
                 if (carSpeedCurrent < 0) carSpeedCurrent = 0;
 
                 msgEl.innerText = "⚠️ 障害物を感知！自動ブレーキ作動中！";
-                msgEl.className = "absolute top-3 left-1/2 -translate-x-1/2 bg-amber-100 border border-amber-400 text-amber-900 shadow px-4 py-1.5 rounded-full text-xs md:text-sm font-bold text-center block";
+                msgEl.className = "w-[92%] md:w-auto max-w-2xl absolute top-3 left-1/2 -translate-x-1/2 bg-amber-100 border-2 border-amber-400 text-amber-950 shadow px-4 py-2 rounded-xl text-sm md:text-base font-bold text-center block";
             }
 
             carX += carSpeedCurrent;
 
-            // 2. 💥 衝突判定
             if (carX + carWidth >= targetObstacleX && carSpeedCurrent > 0.05) {
                 simRunning = false;
-                msgEl.innerText = "💥 衝突！ センサー検知が遅すぎるか、ブレーキが弱すぎました。パラメーターを強めに調整しよう！";
-                msgEl.className = "absolute top-3 left-1/2 -translate-x-1/2 bg-rose-100 border border-rose-500 text-rose-950 shadow px-4 py-1.5 rounded-full text-xs md:text-sm font-bold text-center block";
-                drawSimulationFrame(true, targetObstacleX);
+                msgEl.innerText = "惜しい！ぶつかってしまいました。次は「センサー距離」を長くするか「ブレーキ」を強くしてみよう！💡";
+                msgEl.className = "w-[92%] md:w-auto max-w-2xl absolute top-3 left-1/2 -translate-x-1/2 bg-amber-50 border-2 border-amber-500 text-amber-950 shadow-md px-4 py-2 rounded-xl text-sm md:text-base font-bold text-center block";
+                drawSimulationFrame(true, targetObstacleX, true);
                 return;
             }
 
-            // 3. ✨ 安全停止成功判定
             if (carSpeedCurrent <= 0.05) {
                 simRunning = false;
-                msgEl.innerText = "✨ 安全停止成功！障害物の手前でぴったり止まれました！";
-                msgEl.className = "absolute top-3 left-1/2 -translate-x-1/2 bg-emerald-100 border border-emerald-500 text-emerald-950 shadow px-4 py-1.5 rounded-full text-xs md:text-sm font-bold text-center block";
+                msgEl.innerText = "✨ 大成功！障害物の手前でぴったり安全に止まれました！";
+                msgEl.className = "w-[92%] md:w-auto max-w-2xl absolute top-3 left-1/2 -translate-x-1/2 bg-emerald-100 border-2 border-emerald-500 text-emerald-950 shadow px-4 py-2 rounded-xl text-sm md:text-base font-bold text-center block";
                 
-                // 次の学習へのメッセージバナー表示
                 document.getElementById('sim-success-banner').classList.remove('hidden');
 
                 if (typeof confetti === 'function') {
                     confetti({ particleCount: 60, spread: 50, origin: { y: 0.7 } });
                 }
 
-                drawSimulationFrame(false, targetObstacleX);
+                drawSimulationFrame(false, targetObstacleX, true);
                 return;
             }
 
-            drawSimulationFrame(false, targetObstacleX);
+            drawSimulationFrame(false, targetObstacleX, isBraking);
             simAnimFrame = requestAnimationFrame(runSimulationLoop);
         }
 
-        function drawSimulationFrame(isCrashed = false, obsX = canvas ? canvas.width - 100 : 300) {
+        function drawSimulationFrame(isCrashed = false, obsX = canvas ? canvas.width - 100 : 300, isBraking = false) {
             if (!ctx) return;
             const width = canvas.width;
             const height = canvas.height;
 
-            // 背景（道路環境）
-            ctx.fillStyle = '#f1f5f9';
-            ctx.fillRect(0, 0, width, height);
+            // 空・背景
+            ctx.fillStyle = '#e0f2fe';
+            ctx.fillRect(0, 0, width, height / 2 - 35);
+            ctx.fillStyle = '#dcfce7';
+            ctx.fillRect(0, height / 2 + 35, width, height);
 
             // 道路
             ctx.fillStyle = '#475569';
             ctx.fillRect(0, height / 2 - 35, width, 70);
             
             // センターライン
-            ctx.strokeStyle = '#f59e0b';
+            ctx.strokeStyle = '#facc15';
             ctx.setLineDash([16, 12]);
             ctx.lineWidth = 2.5;
             ctx.beginPath();
@@ -1161,76 +1305,98 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // 障害物
-            ctx.fillStyle = isCrashed ? '#dc2626' : '#e11d48';
-            ctx.fillRect(obsX, height / 2 - 28, 22, 56);
+            // 障害物（三角コーン風のイラスト）
+            ctx.fillStyle = isCrashed ? '#f59e0b' : '#e11d48';
+            ctx.beginPath();
+            ctx.moveTo(obsX + 12, height / 2 - 26);
+            ctx.lineTo(obsX + 26, height / 2 + 26);
+            ctx.lineTo(obsX - 2, height / 2 + 26);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(obsX + 5, height / 2 - 4, 14, 6);
+
             ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 11px sans-serif';
-            ctx.fillText('障害物', obsX - 6, height / 2 - 33);
+            ctx.font = 'bold 13px sans-serif';
+            ctx.fillText('障害物', obsX - 8, height / 2 - 32);
 
-            // 自動車
-            const carY = height / 2 - 16;
-            const carW = 60;
-            const carH = 32;
+            // 自動車イラスト
+            const carY = height / 2 - 18;
+            const carW = 64;
+            const carH = 34;
 
-            ctx.fillStyle = isCrashed ? '#b91c1c' : '#2563eb';
-            // 安全な互換描写 (roundRectフォールバック)
+            // 車体
+            ctx.fillStyle = isCrashed ? '#d97706' : '#2563eb';
             if (ctx.roundRect) {
                 ctx.beginPath();
-                ctx.roundRect(carX, carY, carW, carH, 6);
+                ctx.roundRect(carX, carY, carW, carH, 8);
                 ctx.fill();
             } else {
                 ctx.fillRect(carX, carY, carW, carH);
             }
+            // フロントガラス
+            ctx.fillStyle = '#bae6fd';
+            ctx.fillRect(carX + 36, carY + 5, 16, carH - 10);
 
-            // ライト
+            // ヘッドライト
             ctx.fillStyle = '#fef08a';
-            ctx.fillRect(carX + carW - 3, carY + 4, 3, 6);
-            ctx.fillRect(carX + carW - 3, carY + carH - 10, 3, 6);
+            ctx.fillRect(carX + carW - 3, carY + 4, 4, 7);
+            ctx.fillRect(carX + carW - 3, carY + carH - 11, 4, 7);
+
+            // ブレーキランプ（作動時に赤く点灯！）
+            if (isBraking) {
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(carX - 3, carY + 3, 5, 8);
+                ctx.fillRect(carX - 3, carY + carH - 11, 5, 8);
+            }
 
             // センサー照射波
             const sliderRange = parseFloat(document.getElementById('sim-range-slider').value);
             const sensorRangePx = sliderRange * 1.8;
 
-            ctx.fillStyle = isCrashed ? 'rgba(239, 68, 68, 0.25)' : 'rgba(2, 132, 199, 0.2)';
-            ctx.strokeStyle = isCrashed ? '#dc2626' : '#0284c7';
+            ctx.fillStyle = isCrashed ? 'rgba(245, 158, 11, 0.25)' : 'rgba(6, 182, 212, 0.22)';
+            ctx.strokeStyle = isCrashed ? '#d97706' : '#0284c7';
             ctx.lineWidth = 1.5;
 
             ctx.beginPath();
             ctx.moveTo(carX + carW, carY + carH / 2);
-            ctx.lineTo(carX + carW + sensorRangePx, carY + carH / 2 - 25);
-            ctx.lineTo(carX + carW + sensorRangePx, carY + carH / 2 + 25);
+            ctx.lineTo(carX + carW + sensorRangePx, carY + carH / 2 - 26);
+            ctx.lineTo(carX + carW + sensorRangePx, carY + carH / 2 + 26);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
         }
 
 
-        // ---------- 5. スライド10 (理解度確認クイズ) ----------
+        // ---------- 6. Slide 9: 理解度確認クイズ ----------
         const QUIZ_DATA = [
             {
-                question: "【問1】 計測制御において、人間の「目や耳」のように温度や障害物などを測る装置は？",
-                options: ["1. アクチュエータ", "2. センサー", "3. マイコン(制御部)", "4. インバーター"],
+                question: "【問1】 計測制御において、人間の「目や耳」のように温度や障害物などを測る装置はどれでしょう？",
+                options: ["1. アクチュエータ", "2. センサー", "3. マイコン（制御部）", "4. モーター"],
                 answer: 1,
-                explanation: "正解！「センサー」は光・温度・距離などを電気信号に変換する人間の『目や耳』にあたる装置です。"
+                explanation: "「センサー」は光・温度・距離などを電気信号に変える、人間の『目や耳』にあたる部品です！",
+                hint: "周りの様子を「感じ取る（センスする）」部品の名前を思い出してみよう！"
             },
             {
-                question: "【問2】 計測した結果を目標値と比較し、絶えず調整を繰り返して補正し続ける制御は？",
-                options: ["1. シーケンス制御", "2. フィードバック制御", "3. 手動制御", "4. リセット制御"],
+                question: "【問2】 計測した結果を目標値と比べ、ズレを直すように何度も調整を繰り返す制御はどれでしょう？",
+                options: ["1. シーケンス制御", "2. フィードバック制御", "3. 手動スイッチ制御", "4. タイマー制御"],
                 answer: 1,
-                explanation: "正解！出力結果を測って目標値とのズレを補正し続ける仕組みを「フィードバック制御」と呼びます。"
+                explanation: "結果をもう一度入力側へ戻して（フィードバック）比較・修正し続けるしくみを「フィードバック制御」と呼びます！",
+                hint: "結果を後ろから前へ「戻す（バックする）」という意味の言葉が入っていますよ！"
             },
             {
-                question: "【問3】 さきほどの自動運転テストで、衝突事故を防ぐために重要だった設定は？",
-                options: ["1. センサー距離を短くする", "2. センサー感知距離を伸ばし・ブレーキを適切な強さにする", "3. 車速を限界まで上げる", "4. ブレーキをオフにする"],
+                question: "【問3】 さきほどの自動運転テストで、車を安全に止めるために大切だった設定はどれでしょう？",
+                options: ["1. センサーの感知距離を短くする", "2. センサー感知距離を伸ばし、ブレーキを適切な強さにする", "3. 車のスピードを限界まで上げる", "4. ブレーキの強さを0%にする"],
                 answer: 1,
-                explanation: "正解！十分な距離で障害物を感知し、適切な強さで自動ブレーキを作動させることが安全制御の基本です。"
+                explanation: "十分な距離で早めに障害物を感知し、適切な強さでブレーキをかけることが安全制御の基本です！",
+                hint: "スライダーをどの方向に動かしたときに安全に止まれたか思い出してみよう！"
             },
             {
-                question: "【問4】 エアコンのファンや自動ドアのモーターなど、命令を受けて「実際に動く手足」は？",
+                question: "【問4】 エアコンのファンや自動ドアのモーターなど、命令を受けて「実際に動く手足」はどれでしょう？",
                 options: ["1. センサー", "2. メモリ", "3. アクチュエータ", "4. モニター"],
                 answer: 2,
-                explanation: "正解！電気信号を受けて機械的な動作を行う装置を「アクチュエータ」と呼びます。"
+                explanation: "電気信号を受けて実際に機械を動かす装置を「アクチュエータ」と呼びます！",
+                hint: "実際に行動・動作（アクション）を起こす部品のことだよ！"
             }
         ];
 
@@ -1248,13 +1414,13 @@
             optionsBox.innerHTML = '';
 
             const explanationEl = document.getElementById('quiz-explanation');
-            explanationEl.className = 'hidden p-4 rounded-xl border text-sm font-medium';
+            explanationEl.className = 'hidden p-4 rounded-xl border-2 text-base font-medium';
             document.getElementById('quiz-next-btn').classList.add('hidden');
 
             quiz.options.forEach((optText, optIdx) => {
                 const btn = document.createElement('button');
-                btn.className = 'w-full text-left bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold p-3.5 rounded-xl border border-slate-300 transition flex items-center justify-between group shadow-sm text-sm';
-                btn.innerHTML = `<span>${optText}</span><i class="fa-solid fa-chevron-right text-xs text-blue-600 group-hover:translate-x-1 transition-transform"></i>`;
+                btn.className = 'w-full text-left bg-slate-50 hover:bg-blue-50 text-slate-900 font-bold p-4 rounded-xl border-2 border-slate-300 hover:border-blue-500 transition flex items-center justify-between group shadow-sm text-base';
+                btn.innerHTML = `<span>${optText}</span><i class="fa-solid fa-chevron-right text-sm text-blue-600 group-hover:translate-x-1 transition-transform"></i>`;
                 btn.onclick = () => answerQuiz(optIdx);
                 optionsBox.appendChild(btn);
             });
@@ -1266,15 +1432,20 @@
             const optionsBox = document.getElementById('quiz-options');
 
             const buttons = optionsBox.querySelectorAll('button');
-            buttons.forEach(btn => btn.disabled = true);
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === quiz.answer) {
+                    btn.classList.add('border-emerald-500', 'bg-emerald-50');
+                }
+            });
 
             if (selectedOptionIdx === quiz.answer) {
                 quizScore++;
-                explanationEl.innerText = `⭕ 正解！ ${quiz.explanation}`;
-                explanationEl.className = 'p-4 rounded-xl border text-sm font-bold bg-emerald-50 border-emerald-400 text-emerald-950 block';
+                explanationEl.innerHTML = `⭕ <strong>大正解！</strong> ${quiz.explanation}`;
+                explanationEl.className = 'p-4 rounded-xl border-2 text-base font-bold bg-emerald-50 border-emerald-400 text-emerald-950 block';
             } else {
-                explanationEl.innerText = `❌ 不正解！ ${quiz.explanation}`;
-                explanationEl.className = 'p-4 rounded-xl border text-sm font-bold bg-rose-50 border-rose-400 text-rose-950 block';
+                explanationEl.innerHTML = `💡 <strong>惜しい！次はここを見てみよう：</strong> ${quiz.hint}<br><span class="text-sm font-normal mt-1 inline-block">（答えは「${quiz.options[quiz.answer]}」です。${quiz.explanation}）</span>`;
+                explanationEl.className = 'p-4 rounded-xl border-2 text-base font-bold bg-amber-50 border-amber-400 text-amber-950 block';
             }
 
             document.getElementById('quiz-score-live').innerText = `現在のスコア: ${quizScore * 25} 点`;
@@ -1298,6 +1469,15 @@
             const finalScorePercent = (quizScore / QUIZ_DATA.length) * 100;
             document.getElementById('quiz-final-score').innerText = `${QUIZ_DATA.length} 問中 ${quizScore} 問 正解！ (${finalScorePercent}点)`;
 
+            const msgEl = document.getElementById('quiz-feedback-msg');
+            if (finalScorePercent === 100) {
+                msgEl.innerText = "パーフェクト！計測制御の基本をしっかりマスターできましたね！";
+            } else if (finalScorePercent >= 50) {
+                msgEl.innerText = "ナイスチャレンジ！解説のポイントを振り返ればバッチリです！";
+            } else {
+                msgEl.innerText = "最後まで挑戦できましたね！もう一度チャレンジして満点を目指そう！";
+            }
+
             if (finalScorePercent >= 75 && typeof confetti === 'function') {
                 confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             }
@@ -1307,15 +1487,12 @@
 
         function renderResultChart(correctCount, wrongCount) {
             const ctxChart = document.getElementById('quiz-chart').getContext('2d');
-            
-            if (quizChartInstance) {
-                quizChartInstance.destroy();
-            }
+            if (quizChartInstance) quizChartInstance.destroy();
 
             quizChartInstance = new Chart(ctxChart, {
                 type: 'doughnut',
                 data: {
-                    labels: ['正解', '不正解'],
+                    labels: ['正解', 'もう一度確認'],
                     datasets: [{
                         data: [correctCount, wrongCount],
                         backgroundColor: ['#2563eb', '#cbd5e1'],
@@ -1327,7 +1504,7 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { color: '#0f172a', font: { family: 'Noto Sans JP', weight: 'bold' } }
+                            labels: { color: '#0f172a', font: { family: 'Noto Sans JP', weight: 'bold', size: 13 } }
                         }
                     }
                 }
